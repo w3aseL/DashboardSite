@@ -165,7 +165,7 @@ export const ImageTab = props => {
   return (
     <>
       <ImageDeleteModal isOpen={modal} toggle={(refresh=false) => toggle(refresh)} images={state.data ? state.data.images : []} />
-      <Container className="mt-3">
+      <Container className="mt-3 mb-3">
         <Row>
           <Col md="6">
             <h4 className="w-100"><em>Manage Images</em></h4>
@@ -182,7 +182,7 @@ export const ImageTab = props => {
                 <h4 className="w-100 text-muted text-center"><em>No images found...</em></h4>
               }
               {state.data.images.map((obj, i) => (
-                <Col md="4" className="ml-auto mr-auto">
+                <Col md="4" className={`ml-auto mr-auto${i > 2 ? " mt-3" : ""}`}>
                   <ImageCard image={obj} />
                 </Col>
               ))}

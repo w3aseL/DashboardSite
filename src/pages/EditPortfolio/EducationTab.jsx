@@ -342,7 +342,7 @@ const EducationCard = ({ data, toggleEditModal }) => {
 
   return (
     <Card>
-      <Container>
+      <Container className="mt-2 mb-2">
         <Row className="d-flex">
           <Col sm="3" className="ml-sm-auto mr-sm-auto">
             <img width="100%" height="auto" src={school_logo}></img>
@@ -427,7 +427,7 @@ export const EducationTab = props => {
     <>
       <AddEducationModal toggle={(refresh=false) => toggleModal("addModal", refresh)} isOpen={modal.addModal} />
       <EditEducationModal toggle={(refresh=false) => toggleModal("editModal", refresh)} isOpen={modal.editModal} id={editIdentifer} />
-      <Container className="mt-3">
+      <Container className="mt-3 mb-3">
         <Row>
           <Col md="6" className="d-flex">
             <h4 className="w-100"><em>Edit Education</em></h4>
@@ -443,7 +443,7 @@ export const EducationTab = props => {
                 <h4 className="w-100 text-muted text-center"><em>No education data found...</em></h4>
               }
               {state.data.education.map((obj, i) => (
-                <Col md="6" className="ml-auto mr-auto">
+                <Col md="6" className={`ml-auto mr-auto${i > 1 ? " mt-3" : ""}`}>
                   <EducationCard data={obj} toggleEditModal={openEditModal} />
                 </Col>
               ))}

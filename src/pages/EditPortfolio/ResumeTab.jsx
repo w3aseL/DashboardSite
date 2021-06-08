@@ -227,7 +227,7 @@ export const ResumeTab = props => {
   if(state.data && state.data.resumes && state.data.resumes.length > 0 && !resume)
     setResume(state.data.resumes[0])
 
-  console.log(state)
+  // console.log(state)
 
   return (
     <>
