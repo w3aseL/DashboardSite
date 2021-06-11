@@ -10,6 +10,8 @@ import { EducationTab } from "./EducationTab"
 import { ImageTab } from "./ImageTab"
 import { ResumeTab } from "./ResumeTab"
 import { ToolTab } from "./ToolTab"
+import { ProjectTab } from "./ProjectTab"
+import { PositionTab } from "./PositionTab"
 
 const EditPortfolio = props => {
   const [state, setState] = useState({
@@ -81,37 +83,19 @@ const EditPortfolio = props => {
                 <EducationTab />
               </TabPane>
               <TabPane tabId="editPortfolio-1">
-                <Row>
-                  <ToolTab />
-                </Row>
+                <ToolTab />
               </TabPane>
               <TabPane tabId="editPortfolio-2">
-                <Row>
-                  <Col sm="12">
-                    <h4>TBD</h4>
-                  </Col>
-                </Row>
+                <ProjectTab />
               </TabPane>
               <TabPane tabId="editPortfolio-3">
-                <Row>
-                  <Col sm="12">
-                    <h4>TBD</h4>
-                  </Col>
-                </Row>
+                <PositionTab />
               </TabPane>
               <TabPane tabId="editPortfolio-4">
-                <Row>
-                  <Col sm="12">
-                    <ResumeTab />
-                  </Col>
-                </Row>
+                <ResumeTab />
               </TabPane>
               <TabPane tabId="editPortfolio-5">
-                <Row>
-                  <Col sm="12">
-                    <ImageTab />
-                  </Col>
-                </Row>
+                <ImageTab />
               </TabPane>
             </TabContent>
           </Col>

@@ -302,7 +302,7 @@ const EditToolModal = ({ isOpen, toggle, id }) => {
     Object.keys(form).forEach(key => {
       if(typeof(form[key]) === "string" && (key !== "category" || key !== "logo_id") && form[key].length === 0)
         valid = false
-      else if(typeof(form[key] === "string") && form[key].length > 0 && form[key] !== loaded.original_data[key])
+      else if(typeof(form[key]) === "string" && form[key].length > 0 && form[key] !== loaded.original_data[key])
         condensedForm[key] = form[key]
     })
 
@@ -513,7 +513,7 @@ export const ToolTab = props => {
     .catch(err => setState({ ...state, loading: false, error: err }))
   }
 
-  console.log(state)
+  // console.log(state)
 
   return (
     <>

@@ -3,7 +3,7 @@ import classnames from "classnames"
 import { Container, Row, Col, Button, Modal, ModalHeader, ModalBody, ModalFooter, Card, Form, FormGroup, Input, FormText, Label } from "reactstrap"
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlus, faPencilAlt } from "@fortawesome/free-solid-svg-icons"
+import { faPlus, faPencilAlt, faTrash } from "@fortawesome/free-solid-svg-icons"
 
 import { request } from "../../api"
 
@@ -246,6 +246,20 @@ const EditEducationModal = ({ toggle, isOpen, id }) => {
     .catch(err => setState({ ...state, loading: false, error: err }))
   }
 
+  const deleteEducation = e => {
+    e.preventDefault()
+
+    setState({ loading: true, data: null, error: null })
+
+    request(`/portfolio/education`, { id }, "DELETE", true)
+    .then(res => {
+      setState({ loading: false, data: res.data })
+
+      closeModal(true)
+    })
+    .catch(err => setState({ loading: false, error: err }))
+  }
+
   if(id && !state.loading && !state.data && !state.error) {
     setState({ ...state, loading: true })
 
@@ -269,7 +283,7 @@ const EditEducationModal = ({ toggle, isOpen, id }) => {
     <Modal isOpen={isOpen} toggle={() => closeModal()}>
       <ModalHeader toggle={() => closeModal()}>Edit Info</ModalHeader>
       <ModalBody>
-        <Form>
+        {/*<Form>
           <Container>
             <Row>
               <Col sm="4">
@@ -297,12 +311,12 @@ const EditEducationModal = ({ toggle, isOpen, id }) => {
             </FormGroup>
             <FormGroup>
               <Label for="reward">Reward</Label>
-              <Input type="text" name="reward" id="reward" placeholder="Enter reward..."  defaultValue={state.data && state.data.graduation_reward} onChange={e => updateField("graduation_reward", e.target.value)} />
+              <Input type="text" name="reward" id="reward" placeholder="Enter reward..." defaultValue={state.data && state.data.graduation_reward} onChange={e => updateField("graduation_reward", e.target.value)} />
               <FormText>E.g. Diploma, Bachelor's Degree</FormText>
             </FormGroup>
             <FormGroup>
               <Label for="major">Major</Label>
-              <Input type="text" name="major" id="major" placeholder="Enter major..."  defaultValue={state.data && state.data.major} onChange={e => updateField("major", e.target.value)} />
+              <Input type="text" name="major" id="major" placeholder="Enter major..." defaultValue={state.data && state.data.major} onChange={e => updateField("major", e.target.value)} />
               <FormText>If applicable</FormText>
             </FormGroup>
             <FormGroup>
@@ -315,9 +329,12 @@ const EditEducationModal = ({ toggle, isOpen, id }) => {
               <Input type="date" name="graduationDate" id="graduationDate" defaultValue={state.data && state.data.graduation_date} onChange={e => updateField("graduation_date", e.target.value)} />
             </FormGroup>
           </Container>
-        </Form>
+        </Form>*/}
+        <h4 className="w-100 text-center">Coming in Phase 2 Update!</h4>
+        <p className="w-100 text-center text-muted">Click the delete button to delete the selected one if you wish to delete it.</p>
       </ModalBody>
       <ModalFooter>
+        <Button className="float-left" onClick={e => deleteEducation(e)} color="danger"><FontAwesomeIcon icon={faTrash} /></Button>
         <Button disabled className="float-left" onClick={e => submitData(e)}>Update</Button>
       </ModalFooter>
     </Modal>
