@@ -129,7 +129,7 @@ const AddPositionModal = ({ isOpen, toggle }) => {
             <hr />
             <FormGroup>
               <Label for="jobTitle">Job Title</Label>
-              <Input type="text" name="jobTitle" id="jobTitle" placeholder="Enter job title..." value={form.company_url} onChange={e => updateField("job_title", e.target.value)} />
+              <Input type="text" name="jobTitle" id="jobTitle" placeholder="Enter job title..." value={form.job_title} onChange={e => updateField("job_title", e.target.value)} />
             </FormGroup>
             <FormGroup>
               <Label for="companyName">Company Name</Label>
@@ -335,7 +335,7 @@ const EditPositionModal = ({ isOpen, toggle, id }) => {
             <hr />
             <FormGroup>
               <Label for="jobTitle">Job Title</Label>
-              <Input type="text" name="jobTitle" id="jobTitle" placeholder="Enter job title..." value={form.job_title} onChange={e => updateField("job_title", e.target.value)} />
+              <Input type="text" name="jobTitle" id="jobTitle" value={form.job_title} placeholder="Enter job title..." onChange={e => updateField("job_title", e.target.value)} />
             </FormGroup>
             <FormGroup>
               <Label for="companyName">Company Name</Label>
