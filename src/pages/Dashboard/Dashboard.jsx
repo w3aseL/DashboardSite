@@ -5,6 +5,7 @@ import { Container, Row, Col, Card, Table } from "reactstrap"
 import { convertSecToHMS } from "../../helpers"
 
 import { request } from "../../api"
+import { API_HOST } from "../../api/config"
 
 import { Layout, SongCard } from "../../components"
 
@@ -25,7 +26,7 @@ const DashboardPage = props => {
     .catch(err => setState({ ...state, loading: false, error: err }))
   }
 
-  console.log(state)
+  // console.log(state)
 
   return (
     <Layout>
@@ -35,6 +36,19 @@ const DashboardPage = props => {
             <h1 className="text-center">Dashboard</h1>
           </Col>
         </Row>
+        {<Row className="d-flex mt-3">
+          <Col md="8" className="d-flex ml-auto mr-auto">
+            <iframe
+              className="m-auto"
+              src={`${API_HOST}/player.html`}
+              frameBorder="0"
+              scrolling="no"
+              width="600px"
+              height="250px"
+              style={{ borderRadius: "5px" }}
+            />
+          </Col>
+        </Row>}
         <Row className="d-flex mt-3">
           <Col md="5" className="ml-auto mr-auto">
             {!state.loading && state.data ?
