@@ -14,7 +14,7 @@ export function loginUser(data) {
 
     request("/user/login", data, "POST", false)
       .then(res => {
-        updateTokens(res.data.tokens)
+        updateTokens(res.data)
 
         localStorage.setItem("user", JSON.stringify(res.data.user))
 

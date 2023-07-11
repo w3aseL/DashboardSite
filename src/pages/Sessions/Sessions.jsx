@@ -76,14 +76,14 @@ const Sessions = props => {
                   <th>Link</th>
                 </thead>
                 <tbody>
-                  {state.data.sessions.map((session, i) => (
+                  {state.data.map((session, i) => (
                     <tr>
                       <th scope="row">{state.offset+i+1}</th>
-                      <td>{new Date(session.start_time).toLocaleString()}</td>
-                      <td>{new Date(session.end_time).toLocaleString()}</td>
-                      <td>{convertSecToHMS(session.time_listening)}</td>
-                      <td>{session.song_count}</td>
-                      <td><a href={`/session/${session.id}`}><em>{"Click to View"}</em></a></td>
+                      <td>{new Date(session.startTime).toLocaleString()}</td>
+                      <td>{new Date(session.endTime).toLocaleString()}</td>
+                      <td>{convertSecToHMS(session.timeListening)}</td>
+                      <td>{session.songCount}</td>
+                      <td><a href={`/session/${session.sessionId}`}><em>{"Click to View"}</em></a></td>
                     </tr>
                   ))}
                 </tbody>

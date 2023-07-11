@@ -43,12 +43,12 @@ const Session = props => {
                   <Row className="d-flex w-100">
                     <h3 className="w-100 text-center">Session Info</h3>
                     <Col md="5" className="ml-auto mr-2 d-flex flex-column">
-                      <p>{`Start Time: ${new Date(state.data.start_time).toLocaleString()}`}</p>
-                      <p>{`End Time: ${new Date(state.data.end_time).toLocaleString()}`}</p>
+                      <p>{`Start Time: ${new Date(state.data.startTime).toLocaleString()}`}</p>
+                      <p>{`End Time: ${new Date(state.data.endTime).toLocaleString()}`}</p>
                     </Col>
                     <Col md="5" className="ml-2 mr-auto d-flex flex-column">
-                      <p>{`Songs Played: ${state.data.song_count}`}</p>
-                      <p>{`Total Time: ${convertSecToHMS(state.data.time_listening)}`}</p>
+                      <p>{`Songs Played: ${state.data.songCount}`}</p>
+                      <p>{`Total Time: ${convertSecToHMS(state.data.timeListening)}`}</p>
                     </Col>
                   </Row>
                   <Row className="d-flex">
@@ -60,13 +60,13 @@ const Session = props => {
                         <th>Album</th>
                       </thead>
                       <tbody>
-                        {state.data.tracks.map((song, i) => (
+                        {state.data.trackPlays.map(({ song, timePlayed }, i) => (
                           <tr>
                             <th scope="row">{i+1}</th>
-                            <td><a href={`/song/${song.id}`}><em>{song.title}</em></a></td>
+                            <td><a href={`/song/${song.id}`}><em>{song.name}</em></a></td>
                             <td>{song.artists.map((artist, i) => (artist.name + (song.artists.length-1 > i ? ", " : "")))}</td>
                             {song.albums && song.albums.length > 0 ?
-                              <td>{song.albums[0].title}</td>
+                              <td>{song.albums[0].name}</td>
                               : 
                               <td>N/A</td>
                             }
