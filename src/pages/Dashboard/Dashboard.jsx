@@ -19,14 +19,14 @@ const DashboardPage = props => {
   if(!state.loading && !state.data && !state.error) {
     setState({ ...state, loading: true })
 
-    request("/spotify/track-all", null, "GET", true)
+    request("/spotify/tracking-all", null, "GET", true)
     .then(res => {
       setState({ ...state, loading: false, data: res.data })
     })
     .catch(err => setState({ ...state, loading: false, error: err }))
   }
 
-  // console.log(state)
+  console.log(state)
 
   return (
     <Layout>
@@ -36,7 +36,8 @@ const DashboardPage = props => {
             <h1 className="text-center">Dashboard</h1>
           </Col>
         </Row>
-        {<Row className="d-flex mt-3">
+        
+        {/*<Row className="d-flex mt-3">
           <Col md="8" className="d-flex ml-auto mr-auto">
             <iframe
               title="audio-player"
@@ -49,13 +50,13 @@ const DashboardPage = props => {
               style={{ borderRadius: "5px" }}
             />
           </Col>
-        </Row>}
+        </Row>*/}
         <Row className="d-flex mt-3">
           <Col md="5" className="ml-auto mr-auto">
             {!state.loading && state.data ?
               <>
-                {state.data.current_song && state.data.session.active ?
-                  <SongCard song={state.data.current_song} cardTitle={state.data.is_playing ? "Now Playing" : "Paused..."} />
+                {state.data.currentSong && state.data.isSessionActive ?
+                  <SongCard song={state.data.currentSong} cardTitle={state.data.isPlaying ? "Now Playing" : "Paused..."} />
                 :
                   <Card>
                     <>
@@ -75,8 +76,8 @@ const DashboardPage = props => {
             <Col md="5" className="ml-auto mr-auto">
               {!state.loading && state.data ?
                 <>
-                  {state.data.previous_song && state.data.session.active ?
-                    <SongCard song={state.data.previous_song} cardTitle={"Previous Song..."} />
+                  {state.data.previousSong && state.data.isSessionActive ?
+                    <SongCard song={state.data.previousSong} cardTitle={"Previous Song..."} />
                   :
                     <Card>
                       <>
@@ -99,16 +100,16 @@ const DashboardPage = props => {
             <Col md="9" className="ml-auto mr-auto d-flex">
               <Card className="w-100">
                 <Container>
-                  {state.data.session && state.data.session.active ?
+                  {state.data.isSessionActive ?
                     <>
                       <Row className="d-flex w-100">
                         <h3 className="w-100 text-center">Session Info</h3>
                         <Col md="5" className="ml-auto mr-2 d-flex flex-column">
-                          <p>{`Start Time: ${new Date(state.data.session.start_time).toLocaleString()}`}</p>
-                          <p>{`Songs Played: ${state.data.session.songs_played}`}</p>
+                          <p>{`Start Time: ${new Date(state.data.startTime).toLocaleString()}`}</p>
+                          <p>{`Songs Played: ${state.data.songList.length}`}</p>
                         </Col>
                         <Col md="5" className="ml-2 mr-auto d-flex flex-column">
-                          <p>{`Total Time: ${convertSecToHMS(state.data.session.total_session_time)}`}</p>
+                          <p>{`Total Time: ${convertSecToHMS(state.data.sessionLength)}`}</p>
                         </Col>
                       </Row>
                       <Row className="d-flex">
@@ -120,23 +121,15 @@ const DashboardPage = props => {
                             <th>Album</th>
                           </thead>
                           <tbody>
-                            {state.data.session.song_list.map((song, i) => (
+                            {state.data.songList.map(({ song }, i) => (
                               <tr>
                                 <th scope="row">{i+1}</th>
                                 <td>{song.name}</td>
-                                <td>{song.artists.map((artist, i) => (artist.name + (song.artists.length-1 > i ? ", " : "")))}</td>
+                                <td>{song.artists.map(a => a.name).join(", ")}</td>
                                 <td>{song.album.name}</td>
                               </tr>
                             ))}
-                            {state.data.session.songs_played === state.data.session.song_list.length + 1 &&
-                              <tr>
-                                <th scope="row">{state.data.session.songs_played}</th>
-                                <td>{state.data.current_song.name}</td>
-                                <td>{state.data.current_song.artists.map((artist, i) => (artist.name + (state.data.current_song.artists.length-1 > i ? ", " : "")))}</td>
-                                <td>{state.data.current_song.album.name}</td>
-                              </tr>
-                            }
-                            {state.data.session.songs_played === 0 &&
+                            {state.data.songList.length === 0 &&
                               <tr>
                                 <th scope="row">1</th>
                                 <td>N/A</td>

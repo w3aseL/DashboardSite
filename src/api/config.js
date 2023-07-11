@@ -7,6 +7,6 @@ if(hostname === "dashboard.noahtemplet.dev")
 else if (hostname === "qa.dashboard.noahtemplet.dev")
   API_HOST = "https://qa.api.noahtemplet.dev/api"
 else
-  API_HOST = "http://localhost:5192/api"
+  API_HOST = "https://localhost:7057/api"
 
 export { API_HOST }

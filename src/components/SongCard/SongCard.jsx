@@ -8,9 +8,9 @@ const SongCard = props => {
   var albumArtwork = "", title = ""
 
   if(song.albums && song.albums.length > 0)
-    albumArtwork = song.albums[0].artwork_url
+    albumArtwork = song.albums[0].artworkUrl
   else if(song.album)
-    albumArtwork = song.album.artwork_url
+    albumArtwork = song.album.artworkURL
 
   if(song.title)
     title = song.title
