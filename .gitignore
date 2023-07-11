@@ -26,3 +26,6 @@ yarn-error.log*
 
 # Ignore for PROD use
 docker-compose.prod-use.yml
+
+# other
+**/package-lock.json
