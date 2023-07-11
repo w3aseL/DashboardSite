@@ -39,6 +39,7 @@ const DashboardPage = props => {
         {<Row className="d-flex mt-3">
           <Col md="8" className="d-flex ml-auto mr-auto">
             <iframe
+              title="audio-player"
               className="m-auto"
               src={`${API_HOST}/player.html`}
               frameBorder="0"
@@ -127,7 +128,7 @@ const DashboardPage = props => {
                                 <td>{song.album.name}</td>
                               </tr>
                             ))}
-                            {state.data.session.songs_played == state.data.session.song_list.length + 1 &&
+                            {state.data.session.songs_played === state.data.session.song_list.length + 1 &&
                               <tr>
                                 <th scope="row">{state.data.session.songs_played}</th>
                                 <td>{state.data.current_song.name}</td>
@@ -135,7 +136,7 @@ const DashboardPage = props => {
                                 <td>{state.data.current_song.album.name}</td>
                               </tr>
                             }
-                            {state.data.session.songs_played == 0 &&
+                            {state.data.session.songs_played === 0 &&
                               <tr>
                                 <th scope="row">1</th>
                                 <td>N/A</td>

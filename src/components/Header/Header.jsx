@@ -3,8 +3,6 @@ import { connect } from "react-redux"
 import { Container, Nav, Navbar, NavbarBrand, NavItem, NavLink, Dropdown, DropdownToggle, DropdownItem, DropdownMenu } from 'reactstrap';
 import { Avatar } from "@material-ui/core"
 
-import { history } from "../../helpers/history"
-
 class HeaderComp extends React.Component {
   constructor(props) {
     super(props)
@@ -15,7 +13,7 @@ class HeaderComp extends React.Component {
   }
 
   render() {
-    const { routes, loggedIn, user } = this.props
+    const { loggedIn, user } = this.props
 
     return (
       <Navbar color="light" dark expand="light">

@@ -2,9 +2,7 @@ import React, { useState } from "react"
 import classnames from "classnames"
 import { Container, Row, Col, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap"
 
-import { request } from "../../api"
 import { Layout } from "../../components"
-import { history } from "../../helpers/history"
 
 import { EducationTab } from "./EducationTab"
 import { ImageTab } from "./ImageTab"

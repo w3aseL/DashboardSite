@@ -1,5 +1,4 @@
 import React, { useState } from "react"
-import classnames from "classnames"
 import { Container, Row, Col, Button, Modal, ModalHeader, ModalBody, ModalFooter, Card, Form, FormGroup, Input, FormText, Label } from "reactstrap"
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -109,7 +108,7 @@ const AddEducationModal = ({ toggle, isOpen }) => {
           <Container>
             <Row>
               <Col sm="4">
-                <img src={image ? URL.createObjectURL(image) : "https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg"} width="100%" height="auto" />
+                <img src={image ? URL.createObjectURL(image) : "https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg"} width="100%" height="auto" alt="school-logo" />
               </Col>
               <Col sm="8">
                 <h4 className="text-center w-100">Upload Logo</h4>
@@ -184,9 +183,11 @@ const EditEducationModal = ({ toggle, isOpen, id }) => {
     error: null
   })
 
+  /*
   const updateImage = e => {
     setImage(e.target.files[0])
   }
+  */
 
   const updateField = (field, value) => {
     const newForm = { ...form }
@@ -196,6 +197,7 @@ const EditEducationModal = ({ toggle, isOpen, id }) => {
     setForm(newForm)
   }
 
+  /*
   const uploadImage = e => {
     e.preventDefault()
 
@@ -215,6 +217,7 @@ const EditEducationModal = ({ toggle, isOpen, id }) => {
     })
     .catch(err => setState({ ...state, loading: false, error: err }))
   }
+  */
 
   const validateForm = () => {
     let valid = true
@@ -362,7 +365,7 @@ const EducationCard = ({ data, toggleEditModal }) => {
       <Container className="mt-2 mb-2">
         <Row className="d-flex">
           <Col sm="3" className="ml-sm-auto mr-sm-auto">
-            <img width="100%" height="auto" src={school_logo}></img>
+            <img width="100%" height="auto" src={school_logo} alt="school-logo-2"></img>
           </Col>
           <Col sm="9" className="ml-sm-auto mr-sm-auto">
             <h4 className="w-auto pb-0 mb-0"><em>{school_name}</em></h4>
@@ -456,7 +459,7 @@ export const EducationTab = props => {
         <Row className="d-flex mt-3">
           {!state.loading && state.data ?
             <>
-              {state.data.education.length == 0 && 
+              {state.data.education.length === 0 && 
                 <h4 className="w-100 text-muted text-center"><em>No education data found...</em></h4>
               }
               {state.data.education.map((obj, i) => (
