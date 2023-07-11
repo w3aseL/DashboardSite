@@ -12,7 +12,7 @@ export function loginUser(data) {
   return async (dispatch) => {
     dispatch({ type: constants.LOGIN_REQUEST })
 
-    request("/auth/login", data, "POST", false)
+    request("/user/login", data, "POST", false)
       .then(res => {
         updateTokens(res.data.tokens)
 

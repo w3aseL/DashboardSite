@@ -37,12 +37,12 @@ async function refreshAccessToken() {
 
   var response = await axios({
     method: "POST",
-    url: API_HOST + "/auth/refresh",
+    url: API_HOST + "/user/refresh",
     headers: {
       'Content-Type': "application/json",
     },
     data: {
-      refresh_token: refresh
+      refreshToken: refresh
     }
   })
 
