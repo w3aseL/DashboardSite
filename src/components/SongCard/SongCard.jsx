@@ -27,6 +27,7 @@ const SongCard = props => {
             <img
               src={albumArtwork}
               style={{ maxWidth: "100%", alignSelf: "center" }}
+              alt="albumArtwork"
             />
           </Col>
           <Col md="8" className="ml-auto mr-auto d-flex flex-column mb-3">

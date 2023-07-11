@@ -4,10 +4,6 @@ import { connect } from "react-redux"
 import { Navbar, Container, Row, Col } from "reactstrap"
  
 class FooterComp extends React.Component { 
-  constructor(props) {
-    super(props)
-  }
-  
   render() {
     return (
       <Navbar color="light" light>
