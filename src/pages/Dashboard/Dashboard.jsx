@@ -9,6 +9,55 @@ import { API_HOST } from "../../api/config"
 
 import { Layout, SongCard } from "../../components"
 
+const RecentSessions = () => {
+  const [state, setState] = useState({
+    loading: false,
+    data: null,
+    error: null
+  })
+
+  if(!state.loading && !state.data && !state.error) {
+    setState({ ...state, loading: true })
+
+    request("/spotify/data/sessions/recent", null, "GET", true)
+    .then(res => {
+      setState({ ...state, loading: false, data: res.data })
+    })
+    .catch(err => setState({ ...state, loading: false, error: err }))
+  }
+
+  return (
+    <>
+      {!state.loading && state.data ?
+        <Table>
+          <thead>
+            <th>#</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Duration</th>
+            <th>Song Count</th>
+            <th>Link</th>
+          </thead>
+          <tbody>
+            {state.data.sort((a, b) => a.sessionId - b.sessionId).map((session, i) => (
+              <tr>
+                <th scope="row">{session.sessionId}</th>
+                <td>{new Date(session.startTime).toLocaleString()}</td>
+                <td>{new Date(session.endTime).toLocaleString()}</td>
+                <td>{convertSecToHMS(session.timeListening)}</td>
+                <td>{session.songCount}</td>
+                <td><a href={`/session/${session.sessionId}`}><em>{"Click to View"}</em></a></td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      :
+        <h3 className="w-100">Loading...</h3>
+      }
+    </>
+  )
+}
+
 const DashboardPage = props => {
   const [state, setState] = useState({
     loading: false,
@@ -152,6 +201,12 @@ const DashboardPage = props => {
             </Col>
           </Row>
         : null}
+        <Row className="d-flex mt-3 mb-4">
+          <Col md="10" className="ml-auto mr-auto">
+            <h4 className="text-center mb-2">Recent Sessions</h4>
+            <RecentSessions />
+          </Col>
+        </Row>
       </Container>
     </Layout>
   )
