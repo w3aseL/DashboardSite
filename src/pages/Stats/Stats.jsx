@@ -8,7 +8,7 @@ import { request } from "../../api"
 
 import { Layout } from "../../components"
 
-const SongTab = props => {
+const SongTab = () => {
   const [state, setState] = useState({
     loading: false,
     data: null,
@@ -20,7 +20,7 @@ const SongTab = props => {
   if(!state.loading && !state.data && !state.error) {
     setState({ ...state, loading: true })
 
-    request(`/spotify/stats/songs`, null, "GET", true)
+    request(`/spotify/stats/songs?limit=${state.limit}&offset=${state.offset}`, null, "GET", true)
     .then(res => {  
       setState({ ...state, loading: false, data: res.data })
     })
@@ -55,12 +55,14 @@ const SongTab = props => {
     .catch(err => setState({ ...state, loading: false, error: err }))
   }
 
+  console.log(state)
+
   return (
     <div className="d-flex flex-column">
       <h3 className="w-100 text-center">Songs</h3>
       <div className="w-100 d-flex mb-3">
-        <Button outline color="secondary" disabled={!(state.data && state.offset > 0)} className="ml-auto mr-1" onClick={e => prevSongs(e)}>Previous</Button>
-        <Button outline color="secondary" disabled={!(state.data && state.data.next)} className="ml-1 mr-auto" onClick={e => nextSongs(e)}>Next</Button>
+        <Button outline color="secondary" disabled={state.data && state.offset <= 0} className="ml-auto mr-1" onClick={e => prevSongs(e)}>Previous</Button>
+        <Button outline color="secondary" disabled={state.data && state.offset + state.limit >= state.data.totalCount} className="ml-1 mr-auto" onClick={e => nextSongs(e)}>Next</Button>
       </div>
       <Col md="10" className="ml-auto mr-auto d-flex">
         {!state.loading && state.data ?
@@ -73,13 +75,13 @@ const SongTab = props => {
               <th>Total Time Played</th>
             </thead>
             <tbody>
-              {state.data.records.map((data, i) => (
+              {state.data.statistics.map((data, i) => (
                 <tr>
                   <th scope="row">{state.offset+i+1}</th>
-                  <td><a href={`/song/${data.song.id}`}><em>{data.song.title}</em></a></td>
+                  <td><a href={`/song/${data.song.id}`}><em>{data.song.name}</em></a></td>
                   <td>{data.song.artists.map((artist, i) => (artist.name + (data.song.artists.length-1 > i ? ", " : "")))}</td>
-                  <td>{data.times_listened}</td>
-                  <td>{convertSecToHMS(data.total_time_played)}</td>
+                  <td>{data.timesPlayed}</td>
+                  <td>{convertSecToHMS(data.timeListening)}</td>
                 </tr>
               ))}
             </tbody>
@@ -104,7 +106,7 @@ const ArtistTab = props => {
   if(!state.loading && !state.data && !state.error) {
     setState({ ...state, loading: true })
 
-    request(`/spotify/stats/artists`, null, "GET", true)
+    request(`/spotify/stats/artists?limit=${state.limit}&offset=${state.offset}`, null, "GET", true)
     .then(res => {  
       setState({ ...state, loading: false, data: res.data })
     })
@@ -145,8 +147,8 @@ const ArtistTab = props => {
     <div className="d-flex flex-column">
       <h3 className="w-100 text-center">Artists</h3>
       <div className="w-100 d-flex mb-3">
-        <Button outline color="secondary" disabled={!(state.data && state.offset > 0)} className="ml-auto mr-1" onClick={e => prevArtists(e)}>Previous</Button>
-        <Button outline color="secondary" disabled={!(state.data && state.data.next)} className="ml-1 mr-auto" onClick={e => nextArtists(e)}>Next</Button>
+        <Button outline color="secondary" disabled={state.data && state.offset <= 0} className="ml-auto mr-1" onClick={e => prevArtists(e)}>Previous</Button>
+        <Button outline color="secondary" disabled={state.data && state.offset + state.limit >= state.data.totalCount} className="ml-1 mr-auto" onClick={e => nextArtists(e)}>Next</Button>
       </div>
       <Col md="10" className="ml-auto mr-auto d-flex">
         {!state.loading && state.data ?
@@ -158,12 +160,12 @@ const ArtistTab = props => {
               <th>Total Time Listened</th>
             </thead>
             <tbody>
-              {state.data.records.map((data, i) => (
+              {state.data.statistics.map((data, i) => (
                 <tr>
                   <th scope="row">{state.offset+i+1}</th>
                   <td><a href={data.artist.url} target="_blank"><em>{data.artist.name}</em></a></td>
-                  <td>{data.times_listened}</td>
-                  <td>{convertSecToHMS(data.total_time_played)}</td>
+                  <td>{data.timesPlayed}</td>
+                  <td>{convertSecToHMS(data.timeListening)}</td>
                 </tr>
               ))}
             </tbody>

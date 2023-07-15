@@ -8,7 +8,7 @@ const SongCard = props => {
   var albumArtwork = "", title = ""
 
   if(song.albums && song.albums.length > 0)
-    albumArtwork = song.albums[0].artworkUrl
+    albumArtwork = song.albums[0].artworkURL
   else if(song.album)
     albumArtwork = song.album.artworkURL
 
@@ -34,7 +34,7 @@ const SongCard = props => {
             <h4 className="mb-2"><em>{title}</em></h4>
             <p className="mb-2">{song.artists.map((artist, i) => (artist.name + (song.artists.length-1 > i ? ", " : "")))}</p>
             {song.albums && song.albums.length > 0 ?
-              <p className="mb-2">{song.albums[0].title}</p>
+              <p className="mb-2">{song.albums[0].name}</p>
               : null}
             {song.album ?
               <p className="mb-2">{song.album.name}</p>
