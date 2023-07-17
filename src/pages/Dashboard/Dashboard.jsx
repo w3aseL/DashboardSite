@@ -5,7 +5,6 @@ import { Container, Row, Col, Card, Table } from "reactstrap"
 import { convertSecToHMS } from "../../helpers"
 
 import { request } from "../../api"
-import { API_HOST } from "../../api/config"
 
 import { Layout, SongCard } from "../../components"
 
