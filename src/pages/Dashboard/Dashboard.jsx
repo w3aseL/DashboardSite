@@ -5,7 +5,6 @@ import { Container, Row, Col, Card, Table } from "reactstrap"
 import { convertSecToHMS } from "../../helpers"
 
 import { request } from "../../api"
-import { API_HOST } from "../../api/config"
 
 import { Layout, SongCard } from "../../components"
 
@@ -159,6 +158,7 @@ const DashboardPage = props => {
                         </Col>
                         <Col md="5" className="ml-2 mr-auto d-flex flex-column">
                           <p>{`Total Time: ${convertSecToHMS(state.data.sessionLength)}`}</p>
+                          <p>{`Skip Count: ${state.data.skipCount}`}</p>
                         </Col>
                       </Row>
                       <Row className="d-flex">

@@ -1,18 +1,20 @@
 import React, { useState } from "react"
 import classnames from "classnames"
-import { Table, Container, Row, Col, Button, Nav, NavItem, NavLink, TabContent, TabPane } from "reactstrap"
+import { Container, Row, Col, Button, Nav, NavItem, NavLink, TabContent, TabPane, Input, Label } from "reactstrap"
 
 import { convertSecToHMS } from "../../helpers"
 
 import { request } from "../../api"
 
-import { Layout } from "../../components"
+import { Layout, Table } from "../../components"
 
 const SongTab = () => {
   const [state, setState] = useState({
     loading: false,
     data: null,
     error: null,
+    startDate: null,
+    endDate: null,
     limit: 50,
     offset: 0
   })
@@ -20,9 +22,39 @@ const SongTab = () => {
   if(!state.loading && !state.data && !state.error) {
     setState({ ...state, loading: true })
 
-    request(`/spotify/stats/songs?limit=${state.limit}&offset=${state.offset}`, null, "GET", true)
+    request(`/spotify/stats/songs?limit=${state.limit}&offset=${state.offset}${state.startDate ? `&startDate=${state.startDate}` : ""}${state.endDate ? `&endDate=${state.endDate}` : ""}`, null, "GET", true)
     .then(res => {  
       setState({ ...state, loading: false, data: res.data })
+    })
+    .catch(err => setState({ ...state, loading: false, error: err }))
+  }
+
+  const manualRefresh = (newState=state) => {
+    setState({ ...newState, loading: true })
+
+    request(`/spotify/stats/songs?limit=${newState.limit}&offset=${newState.offset}${newState.startDate ? `&startDate=${newState.startDate}` : ""}${newState.endDate ? `&endDate=${newState.endDate}` : ""}`, null, "GET", true)
+    .then(res => {  
+      setState({ ...newState, loading: false, data: res.data })
+    })
+    .catch(err => setState({ ...newState, loading: false, error: err }))
+  }
+
+  const refreshSongsByLimit = limit => {
+    setState({ ...state, loading: true, data: null })
+
+    request(`/spotify/stats/songs?limit=${limit}&offset=${state.offset}${state.startDate ? `&startDate=${state.startDate}` : ""}${state.endDate ? `&endDate=${state.endDate}` : ""}`, null, "GET", true)
+    .then(res => {  
+      setState({ ...state, loading: false, data: res.data, limit })
+    })
+    .catch(err => setState({ ...state, loading: false, error: err }))
+  }
+
+  const refreshSongsByOffset = offset => {
+    setState({ ...state, loading: true, data: null })
+
+    request(`/spotify/stats/songs?limit=${state.limit}&offset=${offset}${state.startDate ? `&startDate=${state.startDate}` : ""}${state.endDate ? `&endDate=${state.endDate}` : ""}`, null, "GET", true)
+    .then(res => {  
+      setState({ ...state, loading: false, data: res.data, offset })
     })
     .catch(err => setState({ ...state, loading: false, error: err }))
   }
@@ -34,7 +66,7 @@ const SongTab = () => {
 
     setState({ ...state, loading: true, data: null })
 
-    request(`/spotify/stats/songs?limit=${state.limit}&offset=${offset}`, null, "GET", true)
+    request(`/spotify/stats/songs?limit=${state.limit}&offset=${offset}${state.startDate ? `&startDate=${state.startDate}` : ""}${state.endDate ? `&endDate=${state.endDate}` : ""}`, null, "GET", true)
     .then(res => {  
       setState({ ...state, loading: false, data: res.data, offset })
     })
@@ -48,11 +80,41 @@ const SongTab = () => {
 
     setState({ ...state, loading: true, data: null })
 
-    request(`/spotify/stats/songs?limit=${state.limit}&offset=${offset}`, null, "GET", true)
+    request(`/spotify/stats/songs?limit=${state.limit}&offset=${offset}${state.startDate ? `&startDate=${state.startDate}` : ""}${state.endDate ? `&endDate=${state.endDate}` : ""}`, null, "GET", true)
     .then(res => {  
       setState({ ...state, loading: false, data: res.data, offset })
     })
     .catch(err => setState({ ...state, loading: false, error: err }))
+  }
+
+  const updateLimit = event => {
+    var limit = Number(event.target.value)
+
+    // updateSearchParam("limit", limit)
+
+    refreshSongsByLimit(limit)
+  }
+
+  const updateOffset = (event, offset) => {
+    event.preventDefault()
+
+    // updateSearchParam("offset", offset)
+
+    refreshSongsByOffset(offset)
+  }
+
+  const updateField = (e, fieldName) => {
+    var newState = { ...state }
+
+    newState[fieldName] = e.target.value
+
+    setState(newState)
+  }
+
+  const refreshStats = e => {
+    e.preventDefault()
+
+    manualRefresh()
   }
 
   console.log(state)
@@ -60,32 +122,39 @@ const SongTab = () => {
   return (
     <div className="d-flex flex-column">
       <h3 className="w-100 text-center">Songs</h3>
-      <div className="w-100 d-flex mb-3">
-        <Button outline color="secondary" disabled={state.data && state.offset <= 0} className="ml-auto mr-1" onClick={e => prevSongs(e)}>Previous</Button>
-        <Button outline color="secondary" disabled={state.data && state.offset + state.limit >= state.data.totalCount} className="ml-1 mr-auto" onClick={e => nextSongs(e)}>Next</Button>
+      <h6 className="w-100 text-left mb-1"><em>Date Range</em></h6>
+      <div className="w-100 d-flex mt-2 mb-4">
+        <div className="d-flex flex-row ml-0 mr-2">
+          <Input type="date" name="songStartDate" value={state.startDate} onChange={e => updateField(e, 'startDate')}></Input>
+        </div>
+        <div className="d-flex flex-row ml-2 mr-auto">
+          <Input type="date" name="songEndDate" onChange={e => updateField(e, 'endDate')}></Input>
+        </div>
+        <Button outline onClick={refreshStats} className="ml-auto mr-0 mt-auto mb-auto">Refresh</Button>
       </div>
       <Col md="10" className="ml-auto mr-auto d-flex">
         {!state.loading && state.data ?
-          <Table>
-            <thead>
-              <th>#</th>
-              <th>Title</th>
-              <th>Artist(s)</th>
-              <th>Times Listened</th>
-              <th>Total Time Played</th>
-            </thead>
-            <tbody>
-              {state.data.statistics.map((data, i) => (
-                <tr>
-                  <th scope="row">{state.offset+i+1}</th>
-                  <td><a href={`/song/${data.song.id}`}><em>{data.song.name}</em></a></td>
-                  <td>{data.song.artists.map((artist, i) => (artist.name + (data.song.artists.length-1 > i ? ", " : "")))}</td>
-                  <td>{data.timesPlayed}</td>
-                  <td>{convertSecToHMS(data.timeListening)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          <Table
+            data={state.data.statistics}
+            headers={[ '#', 'Title', 'Artist(s)', 'Times Listened', 'Total Time Played' ]}
+            rowRender={(data, i) => (
+              <tr>
+                <th scope="row">{state.offset+i+1}</th>
+                <td><a href={`/song/${data.song.id}`}><em>{data.song.name}</em></a></td>
+                <td>{data.song.artists.map((artist, i) => (artist.name + (data.song.artists.length-1 > i ? ", " : "")))}</td>
+                <td>{data.timesPlayed}</td>
+                <td>{convertSecToHMS(data.timeListening, true)}</td>
+              </tr>
+            )}
+            offset={state.offset}
+            limit={state.limit}
+            limitOptions={[ 25, 50, 100 ]}
+            total={state.data.totalCount}
+            updateLimit={updateLimit}
+            updateOffset={updateOffset}
+            previous={prevSongs}
+            next={nextSongs}
+          />
         :
           <h3 className="w-100">Loading...</h3>
         }
@@ -99,16 +168,48 @@ const ArtistTab = props => {
     loading: false,
     data: null,
     error: null,
-    limit: 20,
+    startDate: null,
+    endDate: null,
+    limit: 25,
     offset: 0
   })
 
   if(!state.loading && !state.data && !state.error) {
     setState({ ...state, loading: true })
 
-    request(`/spotify/stats/artists?limit=${state.limit}&offset=${state.offset}`, null, "GET", true)
+    request(`/spotify/stats/artists?limit=${state.limit}&offset=${state.offset}${state.startDate ? `&startDate=${state.startDate}` : ""}${state.endDate ? `&endDate=${state.endDate}` : ""}`, null, "GET", true)
     .then(res => {  
       setState({ ...state, loading: false, data: res.data })
+    })
+    .catch(err => setState({ ...state, loading: false, error: err }))
+  }
+
+  const manualRefresh = (newState=state) => {
+    setState({ ...newState, loading: true })
+
+    request(`/spotify/stats/artists?limit=${newState.limit}&offset=${newState.offset}${newState.startDate ? `&startDate=${newState.startDate}` : ""}${newState.endDate ? `&endDate=${newState.endDate}` : ""}`, null, "GET", true)
+    .then(res => {  
+      setState({ ...newState, loading: false, data: res.data })
+    })
+    .catch(err => setState({ ...newState, loading: false, error: err }))
+  }
+
+  const refreshArtistsByLimit = limit => {
+    setState({ ...state, loading: true, data: null })
+
+    request(`/spotify/stats/artists?limit=${limit}&offset=${state.offset}${state.startDate ? `&startDate=${state.startDate}` : ""}${state.endDate ? `&endDate=${state.endDate}` : ""}`, null, "GET", true)
+    .then(res => {  
+      setState({ ...state, loading: false, data: res.data, limit })
+    })
+    .catch(err => setState({ ...state, loading: false, error: err }))
+  }
+
+  const refreshArtistsByOffset = offset => {
+    setState({ ...state, loading: true, data: null })
+
+    request(`/spotify/stats/artists?limit=${state.limit}&offset=${offset}${state.startDate ? `&startDate=${state.startDate}` : ""}${state.endDate ? `&endDate=${state.endDate}` : ""}`, null, "GET", true)
+    .then(res => {  
+      setState({ ...state, loading: false, data: res.data, offset })
     })
     .catch(err => setState({ ...state, loading: false, error: err }))
   }
@@ -120,7 +221,7 @@ const ArtistTab = props => {
 
     setState({ ...state, loading: true, data: null })
 
-    request(`/spotify/stats/artists?limit=${state.limit}&offset=${offset}`, null, "GET", true)
+    request(`/spotify/stats/artists?limit=${state.limit}&offset=${offset}${state.startDate ? `&startDate=${state.startDate}` : ""}${state.endDate ? `&endDate=${state.endDate}` : ""}`, null, "GET", true)
     .then(res => {  
       setState({ ...state, loading: false, data: res.data, offset })
     })
@@ -134,11 +235,41 @@ const ArtistTab = props => {
 
     setState({ ...state, loading: true, data: null })
 
-    request(`/spotify/stats/artists?limit=${state.limit}&offset=${offset}`, null, "GET", true)
+    request(`/spotify/stats/artists?limit=${state.limit}&offset=${offset}${state.startDate ? `&startDate=${state.startDate}` : ""}${state.endDate ? `&endDate=${state.endDate}` : ""}`, null, "GET", true)
     .then(res => {  
       setState({ ...state, loading: false, data: res.data, offset })
     })
     .catch(err => setState({ ...state, loading: false, error: err }))
+  }
+
+  const updateLimit = event => {
+    var limit = Number(event.target.value)
+
+    // updateSearchParam("limit", limit)
+
+    refreshArtistsByLimit(limit)
+  }
+
+  const updateOffset = (event, offset) => {
+    event.preventDefault()
+
+    // updateSearchParam("offset", offset)
+
+    refreshArtistsByOffset(offset)
+  }
+
+  const updateField = (e, fieldName) => {
+    var newState = { ...state }
+
+    newState[fieldName] = e.target.value
+
+    setState(newState)
+  }
+
+  const refreshStats = e => {
+    e.preventDefault()
+
+    manualRefresh()
   }
 
   console.log(state)
@@ -146,30 +277,38 @@ const ArtistTab = props => {
   return (
     <div className="d-flex flex-column">
       <h3 className="w-100 text-center">Artists</h3>
-      <div className="w-100 d-flex mb-3">
-        <Button outline color="secondary" disabled={state.data && state.offset <= 0} className="ml-auto mr-1" onClick={e => prevArtists(e)}>Previous</Button>
-        <Button outline color="secondary" disabled={state.data && state.offset + state.limit >= state.data.totalCount} className="ml-1 mr-auto" onClick={e => nextArtists(e)}>Next</Button>
+      <h6 className="w-100 text-left mb-1"><em>Date Range</em></h6>
+      <div className="w-100 d-flex mt-2 mb-4">
+        <div className="d-flex flex-row ml-0 mr-2">
+          <Input type="date" name="songStartDate" value={state.startDate} onChange={e => updateField(e, 'startDate')}></Input>
+        </div>
+        <div className="d-flex flex-row ml-2 mr-auto">
+          <Input type="date" name="songEndDate" onChange={e => updateField(e, 'endDate')}></Input>
+        </div>
+        <Button outline onClick={refreshStats} className="ml-auto mr-0 mt-auto mb-auto">Refresh</Button>
       </div>
       <Col md="10" className="ml-auto mr-auto d-flex">
         {!state.loading && state.data ?
-          <Table>
-            <thead>
-              <th>#</th>
-              <th>Artist</th>
-              <th>Songs Played</th>
-              <th>Total Time Listened</th>
-            </thead>
-            <tbody>
-              {state.data.statistics.map((data, i) => (
-                <tr>
-                  <th scope="row">{state.offset+i+1}</th>
-                  <td><a href={data.artist.url} target="_blank"><em>{data.artist.name}</em></a></td>
-                  <td>{data.timesPlayed}</td>
-                  <td>{convertSecToHMS(data.timeListening)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          <Table
+            data={state.data.statistics}
+            headers={[ '#', 'Artist', 'Songs Played', 'Total Time Listened' ]}
+            rowRender={(data, i) => (
+              <tr>
+                <th scope="row">{state.offset+i+1}</th>
+                <td><a href={data.artist.url} target="_blank"><em>{data.artist.name}</em></a></td>
+                <td>{data.timesPlayed}</td>
+                <td>{convertSecToHMS(data.timeListening, true)}</td>
+              </tr>
+            )}
+            offset={state.offset}
+            limit={state.limit}
+            limitOptions={[ 15, 25, 50 ]}
+            total={state.data.totalCount}
+            updateLimit={updateLimit}
+            updateOffset={updateOffset}
+            previous={prevArtists}
+            next={nextArtists}
+          />
         :
           <h3 className="w-100">Loading...</h3>
         }
@@ -191,7 +330,7 @@ const Stats = props => {
     <Layout>
       <Container>
         <Row className="d-flex">
-          <Col md="10" className="ml-auto mr-auto mt-3">
+          <Col md="10" className="ml-auto mr-auto mt-3 mb-5">
             <h1 className="w-100 text-center">Statistics</h1>
             <Nav tabs>
               <NavItem>
