@@ -45,6 +45,7 @@ const Session = props => {
                     <Col md="5" className="ml-auto mr-2 d-flex flex-column">
                       <p>{`Start Time: ${new Date(state.data.startTime).toLocaleString()}`}</p>
                       <p>{`End Time: ${new Date(state.data.endTime).toLocaleString()}`}</p>
+                      {state.data.skipCount && <p>{`Skip Count: ${state.data.skipCount}`}</p>}
                     </Col>
                     <Col md="5" className="ml-2 mr-auto d-flex flex-column">
                       <p>{`Songs Played: ${state.data.songCount}`}</p>
