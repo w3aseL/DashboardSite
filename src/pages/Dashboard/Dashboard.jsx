@@ -158,6 +158,7 @@ const DashboardPage = props => {
                         </Col>
                         <Col md="5" className="ml-2 mr-auto d-flex flex-column">
                           <p>{`Total Time: ${convertSecToHMS(state.data.sessionLength)}`}</p>
+                          <p>{`Skip Count: ${state.data.skipCount}`}</p>
                         </Col>
                       </Row>
                       <Row className="d-flex">
