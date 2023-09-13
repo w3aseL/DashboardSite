@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Container, Row, Col, Table, Button, Modal, ModalHeader, ModalBody, ModalFooter, Input, Label, Form, FormGroup } from "reactstrap"
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
@@ -16,6 +16,18 @@ const LinkModal = ({ modal, toggle, currentlyEdited, ...args }) => {
   
   const [fields, setFields] = useState(defaultFields);
 
+  useEffect(() => {
+    if (currentlyEdited == null)
+      setFields(defaultFields);
+    else
+      setFields({
+        linkName: currentlyEdited.linkName,
+        linkUrl: currentlyEdited.linkUrl,
+        logoAlt: currentlyEdited.logoAlt,
+        logoUrl: currentlyEdited.logoUrl
+      });
+  }, [currentlyEdited]);
+
   const updateField = (key, value) => {
     var newFields = { ...fields };
 
@@ -24,7 +36,19 @@ const LinkModal = ({ modal, toggle, currentlyEdited, ...args }) => {
     setFields(newFields)
   }
 
-  console.log(fields)
+  const submitUpdates = e => {
+    e.preventDefault();
+
+    var id = currentlyEdited == null ? undefined : currentlyEdited.id;
+
+    console.log(fields);
+
+    request(`/link`, { ...fields, linkId: id }, currentlyEdited == null ? "POST" : "PATCH", true, 'application/json')
+    .then(() => {
+      toggle(true);
+    })
+    .catch(err => console.log(err));
+  }
 
   return (
     <Modal isOpen={modal} toggle={toggle} {...args}>
@@ -60,7 +84,7 @@ const LinkModal = ({ modal, toggle, currentlyEdited, ...args }) => {
           <Input
             id="logoUrl"
             name="logoUrl"
-            value={fields.linkName}
+            value={fields.logoUrl}
             onChange={e => updateField("logoUrl", e.target.value)}
           />
         </FormGroup>
@@ -71,14 +95,14 @@ const LinkModal = ({ modal, toggle, currentlyEdited, ...args }) => {
           <Input
             id="logoAlt"
             name="logoAlt"
-            value={fields.linkName}
+            value={fields.logoAlt}
             onChange={e => updateField("logoAlt", e.target.value)}
           />
         </FormGroup>
       </Form>
     </ModalBody>
     <ModalFooter>
-      <Button color="primary" onClick={toggle}>
+      <Button color="primary" onClick={submitUpdates}>
         Save
       </Button>{' '}
       <Button color="danger" onClick={toggle}>
@@ -112,8 +136,10 @@ const Links = () => {
     refreshData()
   }
 
-  const toggleModal = () => {
+  const toggleModal = (refresh=false) => {
     setModal(!modal);
+
+    if (refresh) refreshData();
   }
 
   const addLink = (e) => {
@@ -133,9 +159,16 @@ const Links = () => {
   const deleteLink = (e, id) => {
     e.preventDefault();
 
-  }
+    let confirmation = window.confirm("Are you sure you want to delete this link?");
 
-  console.log(state)
+    if (confirmation) {
+      request(`/link/${id}`, null, "DELETE", true)
+      .then(res => {
+        refreshData();
+      })
+      .catch(err => console.log(err));
+    }
+  }
 
   return (
     <>
