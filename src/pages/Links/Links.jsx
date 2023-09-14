@@ -45,6 +45,7 @@ const LinkModal = ({ modal, toggle, currentlyEdited, ...args }) => {
 
     request(`/link`, { ...fields, linkId: id }, currentlyEdited == null ? "POST" : "PATCH", true, 'application/json')
     .then(() => {
+      setFields(defaultFields);
       toggle(true);
     })
     .catch(err => console.log(err));
@@ -163,11 +164,21 @@ const Links = () => {
 
     if (confirmation) {
       request(`/link/${id}`, null, "DELETE", true)
-      .then(res => {
+      .then(() => {
         refreshData();
       })
       .catch(err => console.log(err));
     }
+  }
+
+  const changeLinkOrder = (e, id, increase=true) => {
+    e.preventDefault();
+
+    request(`/link/order`, { linkId: id, increaseOrder: increase }, "POST", true)
+    .then(() => {
+      refreshData();
+    })
+    .catch(err => console.log(err));
   }
 
   return (
@@ -181,7 +192,7 @@ const Links = () => {
               <div className="w-100 d-flex mt-2 mb-2">
               <Button
                   size="md"
-                  className="btn-simple btn-primary ml-0 mr-2"
+                  className="btn-simple btn-success ml-0 mr-2"
                   onClick={e => addLink(e)}
                 ><FontAwesomeIcon icon="add" />{" Add"}</Button>
               </div>
@@ -203,13 +214,25 @@ const Links = () => {
                             <Button
                               size="sm"
                               className="btn-simple btn-secondary ml-0 mr-2"
+                              onClick={e => changeLinkOrder(e, link.id, true)}
+                              disabled={link.orderNumber == 1}
+                            ><FontAwesomeIcon icon="arrow-up" /></Button>
+                            <Button
+                              size="sm"
+                              className="btn-simple btn-warning ml-0 mr-2"
                               onClick={e => editLink(e, link.id)}
                             ><FontAwesomeIcon icon="pencil" /></Button>
                             <Button
                               size="sm"
-                              className="btn-simple btn-danger mr-2 ml-0"
+                              className="btn-simple btn-danger ml-0 mr-2"
                               onClick={e => deleteLink(e, link.id)}
                             ><FontAwesomeIcon icon="trash-can" /></Button>
+                            <Button
+                              size="sm"
+                              className="btn-simple btn-secondary ml-0 mr-0"
+                              onClick={e => changeLinkOrder(e, link.id, false)}
+                              disabled={link.orderNumber == state.data.length}
+                            ><FontAwesomeIcon icon="arrow-down" /></Button>
                           </div>
                         </th>
                         <td>{link.linkName}</td>
