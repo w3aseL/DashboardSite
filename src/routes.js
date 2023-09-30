@@ -2,7 +2,7 @@ import React from "react"
 import { Router, Switch, Route, Redirect } from "react-router-dom"
 import { connect } from "react-redux"
 
-import { Home, Error, Login, Dashboard, Song, Songs, Sessions, Session, Settings, Register, EditPortfolio, TestRoute, Stats, Metrics, Links } from "./pages"
+import { Home, Error, Login, Dashboard, Song, Songs, Sessions, Session, Settings, Register, EditPortfolio, TestRoute, Stats, Metrics, Links, Utility } from "./pages"
 import { history } from "./helpers/history"
 import { logoutUser } from "./redux/auth/actions"
 
@@ -132,6 +132,12 @@ export const ROUTES = [
     path: "/links",
     auth: true,
     component: Links
+  },
+  {
+    name: "Utility",
+    path: "/util",
+    auth: true,
+    component: Utility
   },
   {
     name: "Error",
