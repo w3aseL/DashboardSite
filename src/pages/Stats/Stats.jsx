@@ -317,6 +317,82 @@ const ArtistTab = props => {
   )
 }
 
+const OverallTab = props => {
+  const [state, setState] = useState({
+    loading: false,
+    data: null,
+    error: null,
+    startDate: null,
+    endDate: null
+  })
+
+  if(!state.loading && !state.data && !state.error) {
+    setState({ ...state, loading: true })
+
+    request(`/spotify/stats/summary?${state.startDate ? `&startDate=${state.startDate}` : ""}${state.endDate ? `&endDate=${state.endDate}` : ""}`, null, "GET", true)
+    .then(res => {  
+      setState({ ...state, loading: false, data: res.data })
+    })
+    .catch(err => setState({ ...state, loading: false, error: err }))
+  }
+
+  const manualRefresh = (newState=state) => {
+    setState({ ...newState, loading: true })
+
+    request(`/spotify/stats/summary?${newState.startDate ? `&startDate=${newState.startDate}` : ""}${newState.endDate ? `&endDate=${newState.endDate}` : ""}`, null, "GET", true)
+    .then(res => {  
+      setState({ ...newState, loading: false, data: res.data })
+    })
+    .catch(err => setState({ ...newState, loading: false, error: err }))
+  }
+
+  const updateField = (e, fieldName) => {
+    var newState = { ...state }
+
+    newState[fieldName] = e.target.value
+
+    setState(newState)
+  }
+
+  const refreshStats = e => {
+    e.preventDefault()
+
+    manualRefresh()
+  }
+
+  console.log(state)
+
+  return (
+    <div className="d-flex flex-column">
+      <h3 className="w-100 text-center">Overall</h3>
+      <h6 className="w-100 text-left mb-1"><em>Date Range</em></h6>
+      <div className="w-100 d-flex mt-2 mb-4">
+        <div className="d-flex flex-row ml-0 mr-2">
+          <Input type="date" name="songStartDate" value={state.startDate} onChange={e => updateField(e, 'startDate')}></Input>
+        </div>
+        <div className="d-flex flex-row ml-2 mr-auto">
+          <Input type="date" name="songEndDate" onChange={e => updateField(e, 'endDate')}></Input>
+        </div>
+        <Button outline onClick={refreshStats} className="ml-auto mr-0 mt-auto mb-auto">Refresh</Button>
+      </div>
+      <Col md="10" className="ml-auto mr-auto d-flex">
+        {!state.loading && state.data ?
+        <div className="w-100 flex-column">
+          <h3 className="w-100 text-center">Overall Statistics</h3>
+          <p className="text-center mb-1"><em>Time Listened:</em> {convertSecToHMS(state.data.timeListening, true, true)}</p>
+          <p className="text-center mb-1"><em>Songs Played:</em> {state.data.songsPlayed}</p>
+          <p className="text-center mb-1"><em>Unique Songs:</em> {state.data.uniqueSongs}</p>
+          <p className="text-center mb-1"><em># of Sessions:</em> {state.data.sessionCount}</p>
+          <p className="text-center"><em># Times Skipped:</em> {state.data.skipCount}</p>
+        </div>          
+        :
+          <h3 className="w-100">Loading...</h3>
+        }
+      </Col>
+    </div>
+  )
+}
+
 const Stats = props => {
   const [state, setState] = useState({
     activeTab: 'statistics-0'
@@ -335,7 +411,7 @@ const Stats = props => {
             <Nav tabs>
               <NavItem>
                 <NavLink
-                  className={classnames({ active: state.activeTab === 'editPortfolio-0' })}
+                  className={classnames({ active: state.activeTab === 'statistics-0' })}
                   onClick={() => { setTab('statistics-0') }}
                 >
                   Songs
@@ -343,10 +419,18 @@ const Stats = props => {
               </NavItem>
               <NavItem>
                 <NavLink
-                  className={classnames({ active: state.activeTab === 'editPortfolio-1' })}
+                  className={classnames({ active: state.activeTab === 'statistics-1' })}
                   onClick={() => { setTab('statistics-1') }}
                 >
                   Artists
+                </NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink
+                  className={classnames({ active: state.activeTab === 'statistics-2' })}
+                  onClick={() => { setTab('statistics-2') }}
+                >
+                  Overall
                 </NavLink>
               </NavItem>
             </Nav>
@@ -356,6 +440,9 @@ const Stats = props => {
               </TabPane>
               <TabPane tabId="statistics-1">
                 <ArtistTab />
+              </TabPane>
+              <TabPane tabId="statistics-2">
+                <OverallTab />
               </TabPane>
             </TabContent>
           </Col>
