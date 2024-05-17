@@ -48,3 +48,5 @@ async function refreshAccessToken() {
 
   updateTokens(response.data)
 }
+
+export { API_HOST }
