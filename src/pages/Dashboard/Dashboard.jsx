@@ -85,7 +85,7 @@ const DashboardPage = props => {
           </Col>
         </Row>
         
-        {/*<Row className="d-flex mt-3">
+        {<Row className="d-flex mt-3">
           <Col md="8" className="d-flex ml-auto mr-auto">
             <iframe
               title="audio-player"
@@ -98,7 +98,7 @@ const DashboardPage = props => {
               style={{ borderRadius: "5px" }}
             />
           </Col>
-        </Row>*/}
+        </Row>}
         <Row className="d-flex mt-3">
           <Col md="5" className="ml-auto mr-auto">
             {!state.loading && state.data ?
