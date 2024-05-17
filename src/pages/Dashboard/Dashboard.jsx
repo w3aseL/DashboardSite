@@ -90,7 +90,7 @@ const DashboardPage = props => {
             <iframe
               title="audio-player"
               className="m-auto"
-              src={`${API_HOST}/player.html`}
+              src={`${API_HOST.replace("/api", "")}/player.html`}
               frameBorder="0"
               scrolling="no"
               width="600px"
