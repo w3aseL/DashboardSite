@@ -15,7 +15,7 @@ const AddToolModal = ({ isOpen, toggle }) => {
     name: "",
     url: "",
     description: "",
-    logo_id: "",
+    imageId: "",
     category: ""
   })
   const [description, setDescription] = useState("")
@@ -42,7 +42,7 @@ const AddToolModal = ({ isOpen, toggle }) => {
       name: "",
       url: "",
       description: "",
-      logo_id: "",
+      imageId: "",
       category: ""
     })
     setDescription("")
@@ -80,15 +80,15 @@ const AddToolModal = ({ isOpen, toggle }) => {
       return
 
     var formData = new FormData()
-    formData.append("logo", logo)
+    formData.append("file", logo)
 
     setState({ loading: true })
 
-    request("/portfolio/tool/upload-image", formData, "POST", true, "multipart/form-data")
+    request("/portfolio/tool/logo", formData, "POST", true, "multipart/form-data")
     .then(res => {
       setState({ loading: false, data: res.data })
 
-      updateField("logo_id", res.data.id)
+      updateField("imageId", res.data.id)
     })
     .catch(err => setState({ loading: false, error: err }))
   }
@@ -100,7 +100,7 @@ const AddToolModal = ({ isOpen, toggle }) => {
     let valid = true
 
     Object.keys(form).forEach(key => {
-      if(typeof(form[key]) === "string" && (key !== "category" || key !== "logo_id") && form[key].length === 0)
+      if(typeof(form[key]) === "string" && (key !== "category" || key !== "imageId") && form[key].length === 0)
         valid = false
     })
 
@@ -146,7 +146,7 @@ const AddToolModal = ({ isOpen, toggle }) => {
                 <h4 className="text-center w-100">Upload Logo</h4>
                 <FormGroup>
                   <Input type="file" name="logo" id="logo" onChange={e => updateImage(e)} />
-                  <FormText>Image Identifier: {form.logo_id ? form.logo_id : "N/A"}</FormText>
+                  <FormText>Image Identifier: {form.imageId ? form.imageId : "N/A"}</FormText>
                 </FormGroup>
                 <div className="w-100 d-flex">
                   <Button size="sm" className="ml-auto mr-0" onClick={e => uploadImage(e)}>Upload Image</Button>
@@ -165,7 +165,7 @@ const AddToolModal = ({ isOpen, toggle }) => {
                     <DropdownMenu>
                       <DropdownItem onClick={e => updateField("category", "")}>New Category</DropdownItem>
                       {categories.data && categories.data.length > 0 && categories.data.map((obj, i) => (
-                        <DropdownItem onClick={e => updateField("category", obj)}>{obj}</DropdownItem>
+                        <DropdownItem onClick={e => updateField("category", obj.name)}>{obj.name}</DropdownItem>
                       ))}
                     </DropdownMenu>
                   </Dropdown>
@@ -203,7 +203,7 @@ const EditToolModal = ({ isOpen, toggle, id }) => {
     name: "",
     url: "",
     description: "",
-    logo_id: "",
+    imageId: "",
     category: ""
   })
   const [description, setDescription] = useState("")
@@ -221,7 +221,7 @@ const EditToolModal = ({ isOpen, toggle, id }) => {
   const [loaded, setLoaded] = useState({
     isLoaded: false,
     original_data: null,
-    logo_url: "",
+    imageId: "",
     error: null
   })
 
@@ -236,7 +236,7 @@ const EditToolModal = ({ isOpen, toggle, id }) => {
       name: "",
       url: "",
       description: "",
-      logo_id: "",
+      imageId: "",
       category: ""
     })
     setDescription("")
@@ -254,7 +254,7 @@ const EditToolModal = ({ isOpen, toggle, id }) => {
     setLoaded({
       isLoaded: false,
       original_data: null,
-      logo_url: "",
+      logoURL: "",
       error: null
     })
 
@@ -280,45 +280,42 @@ const EditToolModal = ({ isOpen, toggle, id }) => {
       return
 
     var formData = new FormData()
-    formData.append("logo", logo)
+    formData.append("file", logo)
 
     setState({ loading: true })
 
-    request("/portfolio/tool/upload-image", formData, "POST", true, "multipart/form-data")
+    request("/portfolio/tool/logo", formData, "POST", true, "multipart/form-data")
     .then(res => {
       setState({ loading: false, data: res.data })
 
-      updateField("logo_id", res.data.id)
+      updateField("imageId", res.data.id)
     })
     .catch(err => setState({ loading: false, error: err }))
   }
 
-  const validateFormAndCondense = () => {
+  const validateForm = () => {
     if(description !== "")
       updateField("description", description)
 
-    let valid = true, condensedForm = {}
+    let valid = true
 
     Object.keys(form).forEach(key => {
-      if(typeof(form[key]) === "string" && (key !== "category" || key !== "logo_id") && form[key].length === 0)
+      if(typeof(form[key]) === "string" && (key !== "category" || key !== "imageId") && form[key].length === 0)
         valid = false
-      else if(typeof(form[key]) === "string" && form[key].length > 0 && form[key] !== loaded.original_data[key])
-        condensedForm[key] = form[key]
     })
 
-    return { condensedForm, isValid: valid }
+    return valid
   }
 
   const submitData = e => {
     e.preventDefault()
 
-    const { condensedForm, isValid } = validateFormAndCondense()
-
-    if(!isValid) return
+    if(!validateForm())
+      return
 
     setState({ loading: true, data: null, error: null })
 
-    request(`/portfolio/tool/${id}`, condensedForm, "PATCH", true)
+    request(`/portfolio/tool/${id}`, form, "PATCH", true)
     .then(res => {
       setState({ loading: false, data: res.data })
 
@@ -332,7 +329,7 @@ const EditToolModal = ({ isOpen, toggle, id }) => {
 
     setState({ loading: true, data: null, error: null })
 
-    request(`/portfolio/tool`, { id }, "DELETE", true)
+    request(`/portfolio/tool/${id}`, null, "DELETE", true)
     .then(res => {
       setState({ loading: false, data: res.data })
 
@@ -366,7 +363,7 @@ const EditToolModal = ({ isOpen, toggle, id }) => {
       if(res.data.description)
         setDescription(res.data.description)
 
-      setLoaded({ isLoaded: true, logo_url: res.data.logo_url, original_data: res.data })
+      setLoaded({ isLoaded: true, logoURL: res.data.logoURL, original_data: res.data })
     })
     .catch(err => setLoaded({ error: err }))
   }
@@ -379,13 +376,13 @@ const EditToolModal = ({ isOpen, toggle, id }) => {
           <Container>
             <Row className="d-flex">
               <Col sm="4" md="2" className="ml-auto mr-0">
-                <img src={loaded.logo_url ? loaded.logo_url : (logo ? URL.createObjectURL(logo) : NO_IMG_URL)} width="100%" height="auto" />
+                <img src={loaded.logoURL ? loaded.logoURL : (logo ? URL.createObjectURL(logo) : NO_IMG_URL)} width="100%" height="auto" />
               </Col>
               <Col sm="8" md="4" className="ml-0 mr-auto">
                 <h4 className="text-center w-100">Upload Logo</h4>
                 <FormGroup>
                   <Input type="file" name="logo" id="logo" onChange={e => updateImage(e)} />
-                  <FormText>Image Identifier: {form.logo_id ? form.logo_id : "N/A"}</FormText>
+                  <FormText>Image Identifier: {form.imageId ? form.imageId : "N/A"}</FormText>
                 </FormGroup>
                 <div className="w-100 d-flex">
                   <Button size="sm" className="ml-auto mr-0" onClick={e => uploadImage(e)}>Upload Image</Button>
@@ -404,7 +401,7 @@ const EditToolModal = ({ isOpen, toggle, id }) => {
                     <DropdownMenu>
                       <DropdownItem onClick={e => updateField("category", "")}>New Category</DropdownItem>
                       {categories.data && categories.data.length > 0 && categories.data.map((obj, i) => (
-                        <DropdownItem onClick={e => updateField("category", obj)}>{obj}</DropdownItem>
+                        <DropdownItem onClick={e => updateField("category", obj.name)}>{obj.name}</DropdownItem>
                       ))}
                     </DropdownMenu>
                   </Dropdown>
@@ -439,14 +436,14 @@ const EditToolModal = ({ isOpen, toggle, id }) => {
 }
 
 const ToolCard = ({ tool, toggleModal }) => {
-  const { id, name, url, description, logo_url, category } = tool
+  const { id, name, url, description, logoURL, category } = tool
 
   return (    
     <Card>
       <Container className="mt-2 mb-2">
         <Row>
           <Col sm="3">
-            <img width="100%" height="auto" src={logo_url ? logo_url : NO_IMG_URL}></img>
+            <img width="100%" height="auto" src={logoURL ? logoURL : NO_IMG_URL}></img>
           </Col>
           <Col sm="6">
             <h4 className="w-auto pb-0 mb-0"><em><a href={url} target="_blank">{name}</a></em></h4>
@@ -531,10 +528,10 @@ export const ToolTab = props => {
         <Row className="d-flex mt-3">
           {!state.loading && state.data ?
             <>
-              {state.data.tools.length == 0 && 
+              {state.data.length == 0 && 
                 <h4 className="w-100 text-muted text-center"><em>No tool data found...</em></h4>
               }
-              {state.data.tools.length > 0 && state.data.tools.map((tool, i) => (
+              {state.data.length > 0 && state.data.map((tool, i) => (
                 <Col md="6" className={`ml-auto mr-auto${i > 1 ? " mt-3" : ""}`}>
                   <ToolCard tool={tool} toggleModal={(e, id) => openEditModal(e, id)} />
                 </Col>

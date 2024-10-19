@@ -48,7 +48,7 @@ const ImageDeleteModal = ({ isOpen, toggle, images }) => {
 
     setState({ ...state, loading: true })
 
-    request(`/portfolio/image`, { id }, "DELETE", true)
+    request(`/portfolio/image/${id}`, null, "DELETE", true)
     .then(res => {
       setState({ ...state, loading: false, data: res.data })
 
@@ -70,14 +70,14 @@ const ImageDeleteModal = ({ isOpen, toggle, images }) => {
               <div className="d-flex w-100">
                 <Dropdown className="ml-auto mr-auto" color="primary" isOpen={dropdown} toggle={toggleDropdown}>
                   <DropdownToggle caret>
-                    {!selectedImage ? "Select Image" : selectedImage.file_name}
+                    {!selectedImage ? "Select Image" : selectedImage.fileName}
                   </DropdownToggle>
                   <DropdownMenu>
                     {images.length === 0 &&
                       <DropdownItem disabled>N/A</DropdownItem>
                     }
                     {images.length > 0 && images.map((img, i) => (
-                      <DropdownItem onClick={e => updateSelectedImage(e, img)}>{img.file_name}</DropdownItem>
+                      <DropdownItem onClick={e => updateSelectedImage(e, img)}>{img.fileName}</DropdownItem>
                     ))}
                   </DropdownMenu>
                 </Dropdown>
@@ -101,7 +101,7 @@ const ImageDeleteModal = ({ isOpen, toggle, images }) => {
 }
 
 const ImageCard = ({ image }) => {
-  const { id, url, file_name } = image
+  const { id, url, fileName } = image
 
   return (
     <Card>
@@ -113,7 +113,7 @@ const ImageCard = ({ image }) => {
         </Row>
         <Row className="d-flex">
           <Col sm="10" className="ml-auto mr-auto">
-            <h4 className="w-100 pb-0 mb-0 text-center"><em>{file_name}</em></h4>
+            <h4 className="w-100 pb-0 mb-0 text-center"><em>{fileName}</em></h4>
             <p className="w-100 text-muted text-center">{id}</p>
             <p className="w-100 text-muted text-center"><em>{url}</em></p>
           </Col>
@@ -160,11 +160,11 @@ export const ImageTab = props => {
     toggle()
   }
 
-  //console.log(state)
+  // console.log(state)
 
   return (
     <>
-      <ImageDeleteModal isOpen={modal} toggle={(refresh=false) => toggle(refresh)} images={state.data ? state.data.images : []} />
+      <ImageDeleteModal isOpen={modal} toggle={(refresh=false) => toggle(refresh)} images={state.data ? state.data : []} />
       <Container className="mt-3 mb-3">
         <Row>
           <Col md="6">
@@ -178,10 +178,10 @@ export const ImageTab = props => {
         <Row className="d-flex mt-3">
           {!state.loading && state.data ?
             <>
-              {state.data.images.length == 0 && 
+              {state.data.length == 0 && 
                 <h4 className="w-100 text-muted text-center"><em>No images found...</em></h4>
               }
-              {state.data.images.map((obj, i) => (
+              {state.data.map((obj, i) => (
                 <Col md="4" className={`ml-auto mr-auto${i > 2 ? " mt-3" : ""}`}>
                   <ImageCard image={obj} />
                 </Col>

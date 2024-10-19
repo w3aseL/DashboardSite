@@ -10,7 +10,7 @@ import { request } from "../../api"
 const AddResumeModal = ({ isOpen, toggle }) => {
   const [form, setForm] = useState({
     resume_id: "",
-    creation_date: new Date()
+    creationDate: new Date()
   })
   const [file, setFile] = useState(null)
   const [state, setState] = useState({
@@ -40,7 +40,7 @@ const AddResumeModal = ({ isOpen, toggle }) => {
       return
 
     var formData = new FormData()
-    formData.append("resume", file)
+    formData.append("file", file)
 
     setState({ ...state, loading: true })
 
@@ -100,7 +100,7 @@ const AddResumeModal = ({ isOpen, toggle }) => {
                   <Col sm="12">
                     <FormGroup>
                       <Label for="creationDate">Creation Date</Label>
-                      <Input type="date" name="creationDate" id="creationDate" defaultValue={form.creation_date} onChange={e => updateField("creation_date", e.target.value)} />
+                      <Input type="date" name="creationDate" id="creationDate" defaultValue={form.creationDate} onChange={e => updateField("creationDate", e.target.value)} />
                     </FormGroup>
                   </Col>
                 </Row>
@@ -140,7 +140,7 @@ const DeleteResumeModal = ({ isOpen, toggle, resume }) => {
 
     setState({ ...state, loading: true })
 
-    request("/portfolio/resume", { id: resume.id }, "DELETE", true)
+    request(`/portfolio/resume/${resume.id}`, null, "DELETE", true)
     .then(res => {
       setState({ ...state, loading: false, data: res.data })
 
@@ -156,7 +156,7 @@ const DeleteResumeModal = ({ isOpen, toggle, resume }) => {
         <Container>
           <Row>
             <Col sm="12">
-              <h4 className="text-center"><em>{resume && resume.file_name ? resume.file_name : "TBD"}</em></h4>
+              <h4 className="text-center"><em>{resume && resume.fileName ? resume.fileName : "TBD"}</em></h4>
               <p className="w-100 text-center text-muted mb-1">Resume Identifier: {resume && resume.id ? resume.id : "N/A"}</p>
               <p className="w-100 text-center text-danger mb-1"><em>Delete this resume?</em></p>
             </Col>
@@ -224,10 +224,8 @@ export const ResumeTab = props => {
     .catch(err => setState({ ...state, loading: false, error: err }))
   }
 
-  if(state.data && state.data.resumes && state.data.resumes.length > 0 && !resume)
-    setResume(state.data.resumes[0])
-
-  // console.log(state)
+  if(state.data && state.data && state.data.length > 0 && !resume)
+    setResume(state.data[0])
 
   return (
     <>
@@ -246,20 +244,20 @@ export const ResumeTab = props => {
         <Row className="d-flex mt-3">
           {!state.loading && state.data ?
             <>
-              {state.data.resumes.length == 0 && 
+              {state.data.length == 0 && 
                 <h4 className="w-100 text-muted text-center"><em>No resume data found...</em></h4>
               }
               <div className="d-flex w-100 mb-2">
                 <Dropdown className="ml-auto mr-auto" color="primary" isOpen={dropdown} toggle={toggleDropdown}>
                   <DropdownToggle caret>
-                    {!resume ? "Select Image" : resume.file_name}
+                    {!resume ? "Select Image" : resume.fileName}
                   </DropdownToggle>
                   <DropdownMenu>
-                    {state.data.resumes.length === 0 &&
+                    {state.data.length === 0 &&
                       <DropdownItem disabled>N/A</DropdownItem>
                     }
-                    {state.data.resumes.length > 0 && state.data.resumes.map((obj, i) => (
-                      <DropdownItem onClick={e => updateSelectedResume(e, obj)}>{obj.file_name}</DropdownItem>
+                    {state.data.length > 0 && state.data.map((obj, i) => (
+                      <DropdownItem onClick={e => updateSelectedResume(e, obj)}>{obj.fileName}</DropdownItem>
                     ))}
                   </DropdownMenu>
                 </Dropdown>

@@ -12,15 +12,22 @@ import { request } from "../../api"
 
 const NO_IMG_URL = "https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg"
 
+const processServerDate = date => {
+  if (!date) return date;
+
+  var jsDate = new Date(date);
+  return jsDate.toISOString().split('T')[0];
+}
+
 const AddPositionModal = ({ isOpen, toggle }) => {
   const initialForm = {
-    job_title: "",
-    company_name: "",
-    company_url: "",
+    jobTitle: "",
+    companyName: "",
+    companyURL: "",
     description: "",
-    start_date: "",
-    end_date: "",
-    logo_id: ""
+    startDate: "",
+    endDate: "",
+    imageId: ""
   }
   
   const [form, setForm] = useState(initialForm)
@@ -51,39 +58,48 @@ const AddPositionModal = ({ isOpen, toggle }) => {
       return
 
     var formData = new FormData()
-    formData.append("logo", image)
+    formData.append("file", image)
 
     setState({ ...state, loading: true })
 
-    request("/portfolio/position/upload-image", formData, "POST", true, "multipart/form-data")
+    request("/portfolio/position/logo", formData, "POST", true, "multipart/form-data")
     .then(res => {
       setState({ ...state, loading: false, data: res.data })
 
-      updateField("logo_id", res.data.id)
+      updateField("imageId", res.data.id)
     })
     .catch(err => setState({ ...state, loading: false, error: err }))
   }
 
   const validateForm = () => {
-    let valid = true
+    let valid = true, invalidKeys = [], updatedForm = { ...form }
 
     Object.keys(form).forEach(key => {
-      if(typeof(form[key]) === "string" && (key !== "company_url") && form[key].length === 0)
+      if(typeof(form[key]) === "string" && (key !== "companyURL" && key !== "endDate") && form[key].length === 0)
+      {
         valid = false
+        invalidKeys.push(key);
+      }
     })
 
-    return valid
+    if (invalidKeys.length > 0) console.log(`Invalid keys: ${invalidKeys.join(', ')}`)
+
+    return { valid, updatedForm }
   }
 
   const submitData = e => {
     e.preventDefault()
 
-    if(!validateForm())
+    var { valid, formToSend } = validateForm()
+
+    if(!valid)
       return
 
     setState({ ...state, loading: true, data: null, error: null })
 
-    request("/portfolio/position", form, "POST", true)
+    var endDate = form.endDate !== "" ? form.endDate : undefined
+
+    request("/portfolio/position", { ...form, endDate }, "POST", true)
     .then(res => {
       setState({ ...state, loading: false, data: res.data })
 
@@ -119,7 +135,7 @@ const AddPositionModal = ({ isOpen, toggle }) => {
                 <h4 className="text-center w-100">Upload Logo</h4>
                 <FormGroup>
                   <Input type="file" name="logo" id="logo" onChange={e => updateImage(e)} />
-                  <FormText>Image Identifier: {form.logo_id ? form.logo_id : "N/A"}</FormText>
+                  <FormText>Image Identifier: {form.imageId ? form.imageId : "N/A"}</FormText>
                 </FormGroup>
                 <div className="w-100 d-flex">
                   <Button size="sm" className="ml-auto mr-0" onClick={e => uploadImage(e)}>Upload Image</Button>
@@ -129,24 +145,24 @@ const AddPositionModal = ({ isOpen, toggle }) => {
             <hr />
             <FormGroup>
               <Label for="jobTitle">Job Title</Label>
-              <Input type="text" name="jobTitle" id="jobTitle" placeholder="Enter job title..." value={form.job_title} onChange={e => updateField("job_title", e.target.value)} />
+              <Input type="text" name="jobTitle" id="jobTitle" placeholder="Enter job title..." value={form.jobTitle} onChange={e => updateField("jobTitle", e.target.value)} />
             </FormGroup>
             <FormGroup>
               <Label for="companyName">Company Name</Label>
-              <Input type="text" name="companyName" id="companyName" value={form.company_name} placeholder="Enter company name..." onChange={e => updateField("company_name", e.target.value)} />
+              <Input type="text" name="companyName" id="companyName" value={form.companyName} placeholder="Enter company name..." onChange={e => updateField("companyName", e.target.value)} />
             </FormGroup>
             <FormGroup>
               <Label for="companyUrl">Company URL</Label>
-              <Input type="text" name="companyUrl" id="companyUrl" value={form.company_url} placeholder="Enter company url..." onChange={e => updateField("company_url", e.target.value)} />
+              <Input type="text" name="companyUrl" id="companyUrl" value={form.companyURL} placeholder="Enter company url..." onChange={e => updateField("companyURL", e.target.value)} />
               <FormText>If applicable</FormText>
             </FormGroup>
             <FormGroup>
               <Label for="startDate">Start Date</Label>
-              <Input type="date" name="startDate" id="startDate" value={form.start_date} onChange={e => updateField("start_date", e.target.value)} />
+              <Input type="date" name="startDate" id="startDate" value={form.startDate} onChange={e => updateField("startDate", e.target.value)} />
             </FormGroup>
             <FormGroup>
               <Label for="endDate">End Date</Label>
-              <Input type="date" name="endDate" id="endDate" value={form.end_date} onChange={e => updateField("end_date", e.target.value)} />
+              <Input type="date" name="endDate" id="endDate" value={form.endDate} onChange={e => updateField("endDate", e.target.value)} />
             </FormGroup>
             <FormGroup>
               <Label for="description">Description</Label>
@@ -165,13 +181,13 @@ const AddPositionModal = ({ isOpen, toggle }) => {
 
 const EditPositionModal = ({ isOpen, toggle, id }) => {
   const initialForm = {
-    job_title: "",
-    company_name: "",
-    company_url: "",
+    jobTitle: "",
+    companyName: "",
+    companyURL: "",
     description: "",
-    start_date: "",
-    end_date: "",
-    logo_id: ""
+    startDate: "",
+    endDate: "",
+    imageId: ""
   }
   
   const [form, setForm] = useState(initialForm)
@@ -185,7 +201,7 @@ const EditPositionModal = ({ isOpen, toggle, id }) => {
   const [loaded, setLoaded] = useState({
     isLoaded: false,
     original_data: null,
-    logo_url: "",
+    logoURL: "",
     error: null
   })
 
@@ -208,46 +224,47 @@ const EditPositionModal = ({ isOpen, toggle, id }) => {
       return
 
     var formData = new FormData()
-    formData.append("logo", image)
+    formData.append("file", image)
 
     setState({ ...state, loading: true })
 
-    request("/portfolio/position/upload-image", formData, "POST", true, "multipart/form-data")
+    request("/portfolio/position/logo", formData, "POST", true, "multipart/form-data")
     .then(res => {
       setState({ ...state, loading: false, data: res.data })
 
-      updateField("logo_id", res.data.id)
+      updateField("imageId", res.data.id)
     })
     .catch(err => setState({ ...state, loading: false, error: err }))
   }
 
-  const validateFormAndCondense = () => {
-    let valid = true, condensedForm = {}
-
-    const excludedKeys = [ "company_url", "logo_id", "end_date" ]
+  const validateForm = () => {
+    let valid = true, invalidKeys = [], updatedForm = { ...form }
 
     Object.keys(form).forEach(key => {
-      if(typeof(form[key]) === "string" && !excludedKeys.includes(key) && form[key].length === 0) {
+      if(typeof(form[key]) === "string" && (key !== "companyURL" && key !== "endDate") && form[key].length === 0)
+      {
         valid = false
-      } else if(typeof(form[key]) === "string" && form[key].length > 0 && form[key] !== loaded.original_data[key])
-        condensedForm[key] = form[key]
+        invalidKeys.push(key);
+      }
     })
 
-    console.log(condensedForm, valid)
+    if (invalidKeys.length > 0) console.log(`Invalid keys: ${invalidKeys.join(', ')}`)
 
-    return { condensedForm, isValid: valid }
+    return { valid, updatedForm }
   }
 
   const submitData = e => {
     e.preventDefault()
 
-    const { condensedForm, isValid } = validateFormAndCondense()
+    const { valid, _ } = validateForm()
 
-    if(!isValid) return
+    if(!valid) return
 
     setState({ loading: true, data: null, error: null })
 
-    request(`/portfolio/position/${id}`, condensedForm, "PATCH", true)
+    var endDate = form.endDate !== "" ? form.endDate : undefined
+
+    request(`/portfolio/position/${id}`, { ...form, endDate }, "PATCH", true)
     .then(res => {
       setState({ loading: false, data: res.data })
 
@@ -261,7 +278,7 @@ const EditPositionModal = ({ isOpen, toggle, id }) => {
 
     setState({ loading: true, data: null, error: null })
 
-    request(`/portfolio/position`, { id }, "DELETE", true)
+    request(`/portfolio/position/${id}`, null, "DELETE", true)
     .then(res => {
       setState({ loading: false, data: res.data })
 
@@ -287,7 +304,7 @@ const EditPositionModal = ({ isOpen, toggle, id }) => {
       if(res.data.description)
         setDescription(res.data.description)
 
-      setLoaded({ isLoaded: true, logo_url: res.data.logo_url, original_data: res.data })
+      setLoaded({ isLoaded: true, logoURL: res.data.logoURL, original_data: res.data })
     })
     .catch(err => setLoaded({ error: err }))
   }
@@ -304,7 +321,7 @@ const EditPositionModal = ({ isOpen, toggle, id }) => {
     setLoaded({
       isLoaded: false,
       original_data: null,
-      logo_url: "",
+      logoURL: "",
       error: null
     })
 
@@ -319,13 +336,13 @@ const EditPositionModal = ({ isOpen, toggle, id }) => {
           <Container>
             <Row className="d-flex mt-2">
               <Col sm="4" md="2" className="ml-auto mr-0 d-flex">
-                <img className="mt-auto mb-auto" src={loaded.logo_url ? loaded.logo_url : (image ? URL.createObjectURL(image) : NO_IMG_URL)} width="100%" height="auto" />
+                <img className="mt-auto mb-auto" src={loaded.logoURL ? loaded.logoURL : (image ? URL.createObjectURL(image) : NO_IMG_URL)} width="100%" height="auto" />
               </Col>
               <Col sm="8" md="4" className="ml-0 mr-auto">
                 <h4 className="text-center w-100">Upload Logo</h4>
                 <FormGroup>
                   <Input type="file" name="logo" id="logo" onChange={e => updateImage(e)} />
-                  <FormText>Image Identifier: {form.logo_id ? form.logo_id : "N/A"}</FormText>
+                  <FormText>Image Identifier: {form.imageId ? form.imageId : "N/A"}</FormText>
                 </FormGroup>
                 <div className="w-100 d-flex">
                   <Button size="sm" className="ml-auto mr-0" onClick={e => uploadImage(e)}>Upload Image</Button>
@@ -335,24 +352,24 @@ const EditPositionModal = ({ isOpen, toggle, id }) => {
             <hr />
             <FormGroup>
               <Label for="jobTitle">Job Title</Label>
-              <Input type="text" name="jobTitle" id="jobTitle" value={form.job_title} placeholder="Enter job title..." onChange={e => updateField("job_title", e.target.value)} />
+              <Input type="text" name="jobTitle" id="jobTitle" value={form.jobTitle} placeholder="Enter job title..." onChange={e => updateField("jobTitle", e.target.value)} />
             </FormGroup>
             <FormGroup>
               <Label for="companyName">Company Name</Label>
-              <Input type="text" name="companyName" id="companyName" value={form.company_name} placeholder="Enter company name..." onChange={e => updateField("company_name", e.target.value)} />
+              <Input type="text" name="companyName" id="companyName" value={form.companyName} placeholder="Enter company name..." onChange={e => updateField("companyName", e.target.value)} />
             </FormGroup>
             <FormGroup>
               <Label for="companyUrl">Company URL</Label>
-              <Input type="text" name="companyUrl" id="companyUrl" value={form.company_url} placeholder="Enter company url..." onChange={e => updateField("company_url", e.target.value)} />
+              <Input type="text" name="companyUrl" id="companyUrl" value={form.companyURL} placeholder="Enter company url..." onChange={e => updateField("companyURL", e.target.value)} />
               <FormText>If applicable</FormText>
             </FormGroup>
             <FormGroup>
               <Label for="startDate">Start Date</Label>
-              <Input type="date" name="startDate" id="startDate" value={form.start_date} onChange={e => updateField("start_date", e.target.value)} />
+              <Input type="date" name="startDate" id="startDate" value={processServerDate(form.startDate)} onChange={e => updateField("startDate", e.target.value)} />
             </FormGroup>
             <FormGroup>
               <Label for="endDate">End Date</Label>
-              <Input type="date" name="endDate" id="endDate" value={form.end_date} onChange={e => updateField("end_date", e.target.value)} />
+              <Input type="date" name="endDate" id="endDate" value={processServerDate(form.endDate)} onChange={e => updateField("endDate", e.target.value)} />
             </FormGroup>
             <FormGroup>
               <Label for="description">Description</Label>
@@ -371,7 +388,7 @@ const EditPositionModal = ({ isOpen, toggle, id }) => {
 }
 
 const PositionCard = ({ position, toggleModal }) => {
-  const { id, company_name, description, company_url, start_date, end_date, logo_url } = position
+  const { id, companyName, description, companyURL, startDate, endDate, logoURL } = position
 
   const convertDateToString = dateStr => {
     if(!dateStr) return "Present"
@@ -386,16 +403,16 @@ const PositionCard = ({ position, toggleModal }) => {
       <Container className="mt-2 mb-2">
         <Row>
           <Col sm="3" className="d-flex">
-            <img className="mt-auto mb-auto" width="100%" height="auto" src={logo_url ? logo_url : NO_IMG_URL}></img>
+            <img className="mt-auto mb-auto" width="100%" height="auto" src={logoURL ? logoURL : NO_IMG_URL}></img>
           </Col>
           <Col sm="7">
-            <h4 className="w-auto pb-0 mb-0"><em>{company_url ? <a href={company_url} target="_blank">{company_name}</a> : <>{company_name}</>}</em></h4>
+            <h4 className="w-auto pb-0 mb-0"><em>{companyURL ? <a href={companyURL} target="_blank">{companyName}</a> : <>{companyName}</>}</em></h4>
           </Col>
           <Col sm="2" className="d-flex">
             <Button className="ml-auto mr-0 mt-0 mb-auto" onClick={e => toggleModal(e, id)}><FontAwesomeIcon icon={faPencilAlt} /></Button>
           </Col>
         </Row>
-        <p className="w-100 mt-2 mb-1">{convertDateToString(start_date)} - {convertDateToString(end_date)}</p>
+        <p className="w-100 mt-2 mb-1">{convertDateToString(startDate)} - {convertDateToString(endDate)}</p>
         <p className="w-100 mt-2 mb-1 text-muted"><em>Description</em></p>
         <Row className="d-flex">
           <Col sm="12">
@@ -473,10 +490,10 @@ export const PositionTab = props => {
         <Row className="d-flex mt-3">
           {!state.loading && state.data ?
             <>
-              {state.data.positions.length == 0 && 
+              {state.data.length == 0 && 
                 <h4 className="w-100 text-muted text-center"><em>No position data found...</em></h4>
               }
-              {state.data.positions.map((obj, i) => (
+              {state.data.map((obj, i) => (
                 <Col md="6" className={`ml-auto mr-auto${i > 1 ? " mt-3" : ""}`}>
                   <PositionCard position={obj} toggleModal={openEditModal} />
                 </Col>

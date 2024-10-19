@@ -14,12 +14,13 @@ const checkGPA = gpa => typeof(gpa) === "number" && gpa >= 0.00 && gpa <= 5.00
  */
 const AddEducationModal = ({ toggle, isOpen }) => {
   const initialForm = {
-    school_name: "",
-    school_type: "",
-    graduation_reward: "",
+    schoolName: "",
+    schoolType: "",
+    schoolURL: "",
+    rewardType: "",
     major: "",
-    logo_id: "",
-    graduation_date: new Date(),
+    imageId: "",
+    graduationDate: new Date(),
     gpa: 0.00
   }
 
@@ -50,15 +51,15 @@ const AddEducationModal = ({ toggle, isOpen }) => {
       return
 
     var formData = new FormData()
-    formData.append("logo", image)
+    formData.append("file", image)
 
     setState({ ...state, loading: true })
 
-    request("/portfolio/education/upload-image", formData, "POST", true, "multipart/form-data")
+    request("/portfolio/education/logo", formData, "POST", true, "multipart/form-data")
     .then(res => {
       setState({ ...state, loading: false, data: res.data })
 
-      updateField("logo_id", res.data.id)
+      updateField("imageId", res.data.id)
     })
     .catch(err => setState({ ...state, loading: false, error: err }))
   }
@@ -124,15 +125,19 @@ const AddEducationModal = ({ toggle, isOpen }) => {
             <hr />
             <FormGroup>
               <Label for="schoolName">School Name</Label>
-              <Input type="text" name="schoolName" id="schoolName" placeholder="Enter school name..." onChange={e => updateField("school_name", e.target.value)} />
+              <Input type="text" name="schoolName" id="schoolName" placeholder="Enter school name..." onChange={e => updateField("schoolName", e.target.value)} />
             </FormGroup>
             <FormGroup>
               <Label for="schoolType">School Type</Label>
-              <Input type="text" name="schoolType" id="schoolType" placeholder="Enter school type..." onChange={e => updateField("school_type", e.target.value)} />
+              <Input type="text" name="schoolType" id="schoolType" placeholder="Enter school type..." onChange={e => updateField("schoolType", e.target.value)} />
+            </FormGroup>
+            <FormGroup>
+              <Label for="schoolUrl">School URL</Label>
+              <Input type="text" name="schoolUrl" id="schoolUrl" placeholder="Enter school URL..." onChange={e => updateField("schoolURL", e.target.value)} />
             </FormGroup>
             <FormGroup>
               <Label for="reward">Reward</Label>
-              <Input type="text" name="reward" id="reward" placeholder="Enter reward..." onChange={e => updateField("graduation_reward", e.target.value)} />
+              <Input type="text" name="reward" id="reward" placeholder="Enter reward..." onChange={e => updateField("rewardType", e.target.value)} />
               <FormText>E.g. Diploma, Bachelor's Degree</FormText>
             </FormGroup>
             <FormGroup>
@@ -147,7 +152,7 @@ const AddEducationModal = ({ toggle, isOpen }) => {
             </FormGroup>
             <FormGroup>
               <Label for="graduationDate">Graduation Date</Label>
-              <Input type="date" name="graduationDate" id="graduationDate" onChange={e => updateField("graduation_date", e.target.value)} />
+              <Input type="date" name="graduationDate" id="graduationDate" onChange={e => updateField("graduationDate", e.target.value)} />
             </FormGroup>
           </Container>
         </Form>
@@ -254,7 +259,7 @@ const EditEducationModal = ({ toggle, isOpen, id }) => {
 
     setState({ loading: true, data: null, error: null })
 
-    request(`/portfolio/education`, { id }, "DELETE", true)
+    request(`/portfolio/education/${id}`, null, "DELETE", true)
     .then(res => {
       setState({ loading: false, data: res.data })
 
@@ -345,9 +350,9 @@ const EditEducationModal = ({ toggle, isOpen, id }) => {
 }
 
 const EducationCard = ({ data, toggleEditModal }) => {
-  const { id, school_name, school_logo, school_type, graduation_date, graduation_reward, major, gpa } = data
+  const { id, schoolName, logoURL, schoolType, graduationDate, rewardType, major, gpa } = data
 
-  const gradDate = new Date(graduation_date), hasGraduated = gradDate < new Date()
+  const gradDate = new Date(graduationDate), hasGraduated = gradDate < new Date()
 
   const dateToStr = date => `${date.getMonth()+1}/${date.getFullYear()}`
 
@@ -365,17 +370,17 @@ const EducationCard = ({ data, toggleEditModal }) => {
       <Container className="mt-2 mb-2">
         <Row className="d-flex">
           <Col sm="3" className="ml-sm-auto mr-sm-auto">
-            <img width="100%" height="auto" src={school_logo} alt="school-logo-2"></img>
+            <img width="100%" height="auto" src={logoURL} alt="school-logo-2"></img>
           </Col>
           <Col sm="9" className="ml-sm-auto mr-sm-auto">
-            <h4 className="w-auto pb-0 mb-0"><em>{school_name}</em></h4>
-            <p className="text-muted">{school_type}</p>
+            <h4 className="w-auto pb-0 mb-0"><em>{schoolName}</em></h4>
+            <p className="text-muted">{schoolType}</p>
           </Col>
         </Row>
         <Row className="d-flex">
           <Col sm="8">
             <p className="w-100 text-muted">
-              {`${majorAndRewardProcess(graduation_reward, major)}`}
+              {`${majorAndRewardProcess(rewardType, major)}`}
               <br/>
               {`${gpa} GPA`}
               <br/>
@@ -441,7 +446,7 @@ export const EducationTab = props => {
     .catch(err => setState({ ...state, loading: false, error: err }))
   }
 
-  //console.log(state)
+  // console.log(state)
 
   return (
     <>
@@ -459,10 +464,10 @@ export const EducationTab = props => {
         <Row className="d-flex mt-3">
           {!state.loading && state.data ?
             <>
-              {state.data.education.length === 0 && 
+              {state.data.length === 0 && 
                 <h4 className="w-100 text-muted text-center"><em>No education data found...</em></h4>
               }
-              {state.data.education.map((obj, i) => (
+              {state.data.map((obj, i) => (
                 <Col md="6" className={`ml-auto mr-auto${i > 1 ? " mt-3" : ""}`}>
                   <EducationCard data={obj} toggleEditModal={openEditModal} />
                 </Col>

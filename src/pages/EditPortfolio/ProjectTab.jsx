@@ -17,8 +17,8 @@ const AddProjectModal = ({ isOpen, toggle }) => {
     name: "",
     description: "",
     url: "",
-    repo_url: "",
-    logo_id: "",
+    repoURL: "",
+    imageId: "",
     images: [],
     tools: []
   })
@@ -101,18 +101,16 @@ const AddProjectModal = ({ isOpen, toggle }) => {
       return
 
     var formData = new FormData()
-    formData.append("image", image.data)
-    if(image.isLogo)
-      formData.append("is_logo", "true")
+    formData.append("file", image.data)
 
     setState({ loading: true })
 
-    request("/portfolio/project/upload-image", formData, "POST", true, "multipart/form-data")
+    request(`/portfolio/project/upload-${image.isLogo ? "logo" : "image"}`, formData, "POST", true, "multipart/form-data")
     .then(res => {
       setState({ loading: false, data: res.data })
 
       if(image.isLogo) {
-        updateField("logo_id", res.data.id)
+        updateField("imageId", res.data.id)
       } else {
         addValueToFormArray("images", res.data.id)
       }
@@ -129,12 +127,16 @@ const AddProjectModal = ({ isOpen, toggle }) => {
   }
 
   const validateForm = () => {
-    let valid = true
+    let valid = true, invalidKeys = []
 
     Object.keys(form).forEach(key => {
-      if(typeof(form[key]) === "string" && (key !== "images" || key !== "tools" || key !== "logo_id") && form[key].length === 0)
+      if(typeof(form[key]) === "string" && (key !== "images" && key !== "tools" && key !== "imageId") && form[key].length === 0) {
         valid = false
+        invalidKeys.push(key);
+      }
     })
+
+    if (invalidKeys.length > 0) console.log(`Invalid keys: ${invalidKeys.join(', ')}`)
 
     return valid
   }
@@ -162,8 +164,8 @@ const AddProjectModal = ({ isOpen, toggle }) => {
         name: "",
         description: "",
         url: "",
-        repo_url: "",
-        logo_id: "",
+        repoURL: "",
+        imageId: "",
         images: [],
         tools: []
       })
@@ -201,7 +203,7 @@ const AddProjectModal = ({ isOpen, toggle }) => {
   if(!tools.data) {
     request("/portfolio/tool", null, "GET", true)
     .then(res => {
-      setTools({ data: res.data.tools })
+      setTools({ data: res.data })
     })
     .catch(err => setTools({ error: err }))
   }
@@ -250,7 +252,7 @@ const AddProjectModal = ({ isOpen, toggle }) => {
                 </FormGroup>
                 <FormGroup>
                   <Label for="repoURL">Repository URL</Label>
-                  <Input type="text" name="repoURL" id="repoURL" placeholder="Enter repository url of project..." onChange={e => updateField("repo_url", e.target.value)} />
+                  <Input type="text" name="repoURL" id="repoURL" placeholder="Enter repository url of project..." onChange={e => updateField("repoURL", e.target.value)} />
                 </FormGroup>
                 <FormGroup>
                   <Label for="description">Description</Label>
@@ -299,7 +301,7 @@ const AddProjectModal = ({ isOpen, toggle }) => {
             <TabPane tabId="addProject-2">
               <Row className="d-flex mt-3">
                 <Col sm="4" md="2" className="ml-auto mr-0">
-                  <img src={tools.selectedTool != null ? tools.selectedTool.logo_url : NO_IMG_URL} width="100%" height="auto" />
+                  <img src={tools.selectedTool != null ? tools.selectedTool.logoURL : NO_IMG_URL} width="100%" height="auto" />
                 </Col>
                 <Col sm="8" md="4" className="ml-0 mr-auto">
                   <h4 className="text-center w-100">Add Tool</h4>
@@ -354,7 +356,7 @@ const EditProjectModal = ({ isOpen, toggle, id }) => {
 
     setState({ loading: true, data: null, error: null })
 
-    request(`/portfolio/project`, { id }, "DELETE", true)
+    request(`/portfolio/project/${id}`, null, "DELETE", true)
     .then(res => {
       setState({ loading: false, data: res.data })
 
@@ -396,21 +398,21 @@ const EditProjectModal = ({ isOpen, toggle, id }) => {
 }
 
 const ProjectCard = ({ project, toggleModal }) => {
-  const { id, name, description, url, repo_url, logo_url } = project
+  const { id, name, description, url, repoURL, logoURL } = project
 
   return (
     <Card>
       <Container className="mt-2 mb-2">
         <Row>
           <Col sm="3" className="d-flex">
-            <img className="mt-auto mb-auto" width="100%" height="auto" src={logo_url ? logo_url : NO_IMG_URL}></img>
+            <img className="mt-auto mb-auto" width="100%" height="auto" src={logoURL ? logoURL : NO_IMG_URL}></img>
           </Col>
           <Col sm="7">
             <h4 className="w-auto pb-0 mb-0"><em><a href={url} target="_blank">{name}</a></em></h4>
-            {repo_url && 
+            {repoURL && 
               <p className="text-muted">
-                  <a href={repo_url} target="_blank">
-                    {repo_url.includes("github") ?
+                  <a href={repoURL} target="_blank">
+                    {repoURL.includes("github") ?
                       <>GitHub{" "}<FontAwesomeIcon icon={faGithub} /></>
                       :
                       <>Repository{" "}<FontAwesomeIcon icon={faArrowCircleRight} /></>
@@ -498,10 +500,10 @@ export const ProjectTab = props => {
         <Row className="d-flex mt-3">
           {!state.loading && state.data ?
             <>
-              {state.data.projects.length == 0 && 
+              {state.data.length == 0 && 
                 <h4 className="w-100 text-muted text-center"><em>No project data found...</em></h4>
               }
-              {state.data.projects.length > 0 && state.data.projects.map((project, i) => (
+              {state.data.length > 0 && state.data.map((project, i) => (
                 <Col md="6" className={`ml-auto mr-auto${i > 1 ? " mt-3" : ""}`}>
                   <ProjectCard project={project} toggleModal={(e, id) => openEditModal(e, id)} />
                 </Col>
