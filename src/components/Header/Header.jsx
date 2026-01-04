@@ -1,7 +1,7 @@
 import React from "react"
 import { connect } from "react-redux"
 import { Container, Nav, Navbar, NavbarBrand, NavItem, NavLink, Dropdown, DropdownToggle, DropdownItem, DropdownMenu } from 'reactstrap';
-import { Avatar } from "@material-ui/core"
+import { Avatar } from "@mui/material"
 
 class HeaderComp extends React.Component {
   constructor(props) {
@@ -42,6 +42,7 @@ class HeaderComp extends React.Component {
                         <DropdownItem><NavLink className="text-dark" href="/stats">Statistics</NavLink></DropdownItem>
                         <DropdownItem><NavLink className="text-dark" href="/edit-portfolio">Edit Portfolio</NavLink></DropdownItem>
                         <DropdownItem><NavLink className="text-dark" href="/links">Edit Linktree</NavLink></DropdownItem>
+                        <DropdownItem><NavLink className="text-dark" href="/photography">Photography</NavLink></DropdownItem>
                         <DropdownItem><NavLink className="text-dark" href="/settings">Settings</NavLink></DropdownItem>
                         <DropdownItem><NavLink className="text-dark" href="/logout">Logout</NavLink></DropdownItem>
                       </DropdownMenu>

@@ -2,7 +2,7 @@ import React from "react"
 import { Router, Switch, Route, Redirect } from "react-router-dom"
 import { connect } from "react-redux"
 
-import { Home, Error, Login, Dashboard, Song, Songs, Sessions, Session, Settings, Register, EditPortfolio, TestRoute, Stats, Metrics, Links, Utility } from "./pages"
+import { Home, Error, Login, Dashboard, Song, Songs, Sessions, Session, Settings, Register, EditPortfolio, TestRoute, Stats, Metrics, Links, Utility, Photography } from "./pages"
 import { history } from "./helpers/history"
 import { logoutUser } from "./redux/auth/actions"
 
@@ -108,6 +108,12 @@ export const ROUTES = [
     path: "/edit-portfolio",
     auth: true,
     component: EditPortfolio
+  },
+  {
+    name: "Photography",
+    path: "/photography",
+    auth: true,
+    component: Photography
   },
   {
     name: "TestRoute",
