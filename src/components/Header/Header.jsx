@@ -1,7 +1,7 @@
 import React from "react"
 import { connect } from "react-redux"
 import { Container, Nav, Navbar, NavbarBrand, NavItem, NavLink, Dropdown, DropdownToggle, DropdownItem, DropdownMenu } from 'reactstrap';
-import { Avatar } from "@material-ui/core"
+import { Avatar } from "@mui/material"
 
 class HeaderComp extends React.Component {
   constructor(props) {
