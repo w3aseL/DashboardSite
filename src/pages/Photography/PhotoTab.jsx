@@ -162,7 +162,7 @@ const PhotoEditModal = ({ toggle, isOpen, editing, tags, posts, albums }) => {
                 id="postIds"
                 isClearable={true}
                 value={form.post}
-                options={posts.map(t => ({ value: t.photoTagId, label: t.name }))}
+                options={posts.map(t => ({ value: t.photoPostId, label: t.name }))}
                 onChange={val => updateField("post", val)}
               />
             </FormGroup>
